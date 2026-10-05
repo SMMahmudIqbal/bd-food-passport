@@ -1,0 +1,136 @@
+import React, { useState, useMemo } from 'react';
+import { Search, CheckCircle2, Circle, ChevronDown, ChevronUp } from 'lucide-react';
+import { DISTRICTS_FOOD, toBengaliNumerals } from '../data/foods';
+
+export default function DistrictList({
+  eatenDistricts,
+  onSelectDistrict,
+  onToggleEaten,
+  filterDivision
+}) {
+  const [search, setSearch] = useState('');
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const filteredDistricts = useMemo(() => {
+    return DISTRICTS_FOOD.filter((d) => {
+      const matchesDiv = !filterDivision || d.divisionBn === filterDivision;
+      if (!matchesDiv) return false;
+
+      if (!search.trim()) return true;
+      const q = search.toLowerCase();
+      return (
+        d.nameBn.includes(q) ||
+        d.nameEn.toLowerCase().includes(q) ||
+        d.foodBn.includes(q) ||
+        d.foodEn.toLowerCase().includes(q)
+      );
+    });
+  }, [filterDivision, search]);
+
+  return (
+    <div className="w-full glass-panel rounded-3xl p-4 sm:p-5 mt-4">
+      {/* Header and Toggle */}
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <div className="flex items-center gap-2">
+          <h3 className="font-bold text-base text-slate-800 dark:text-white">
+            জেলার তালিকা
+          </h3>
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-full glass-pill text-slate-600 dark:text-slate-300">
+            {toBengaliNumerals(filteredDistricts.length)}টি
+          </span>
+        </div>
+
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex items-center gap-1 text-xs font-semibold text-teal-600 dark:text-teal-400 hover:underline glass-pill px-2.5 py-1 rounded-xl transition"
+        >
+          <span>{isExpanded ? 'সংক্ষিপ্ত করুন' : 'সব দেখুন'}</span>
+          {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        </button>
+      </div>
+
+      {/* Glass Search Input */}
+      <div className="relative mb-3">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="জেলা বা খাবারের নাম দিয়ে খুঁজুন (যেমন: বগুড়া, রসমালাই, আম)..."
+          className="w-full pl-9 pr-4 py-2.5 rounded-2xl text-xs sm:text-sm glass-pill focus:outline-none focus:ring-2 focus:ring-teal-500/50 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 transition"
+        />
+        {search && (
+          <button
+            onClick={() => setSearch('')}
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 hover:text-slate-600"
+          >
+            ✕
+          </button>
+        )}
+      </div>
+
+      {/* District Cards Grid */}
+      <div
+        className={`grid grid-cols-1 sm:grid-cols-2 gap-2.5 overflow-y-auto transition-all duration-300 ${
+          isExpanded ? 'max-h-[520px]' : 'max-h-[220px]'
+        }`}
+      >
+        {filteredDistricts.length === 0 ? (
+          <div className="col-span-full py-8 text-center text-sm text-slate-400">
+            কোনো জেলা বা খাবার পাওয়া যায়নি
+          </div>
+        ) : (
+          filteredDistricts.map((item) => {
+            const isEaten = eatenDistricts.has(item.id);
+            return (
+              <div
+                key={item.id}
+                onClick={() => onSelectDistrict(item.id)}
+                className={`flex items-center justify-between p-3 rounded-2xl cursor-pointer glass-card-interactive ${
+                  isEaten
+                    ? 'bg-teal-500/10 border border-teal-500/30 dark:bg-teal-950/30 dark:border-teal-500/20'
+                    : 'glass-pill'
+                }`}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="text-2xl select-none shrink-0 w-8 text-center">
+                    {item.emoji}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-bold text-sm text-slate-800 dark:text-white truncate">
+                        {item.nameBn}
+                      </span>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500 truncate">
+                        ({item.nameEn})
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-600 dark:text-slate-300 font-medium truncate">
+                      {item.foodBn}
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onToggleEaten(item.id);
+                  }}
+                  className={`p-2 rounded-xl shrink-0 ml-2 transition ${
+                    isEaten
+                      ? 'text-teal-500 dark:text-teal-400'
+                      : 'text-slate-300 dark:text-slate-600 hover:text-teal-500'
+                  }`}
+                  title={isEaten ? "খেয়েছি (আনমার্ক করতে চাপুন)" : "চিহ্নিত করুন"}
+                >
+                  {isEaten ? <CheckCircle2 size={20} className="fill-teal-500 text-white" /> : <Circle size={20} />}
+                </button>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}
