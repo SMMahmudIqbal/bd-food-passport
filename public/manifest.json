@@ -1,0 +1,20 @@
+{
+  "name": "বাংলাদেশ ফুড পাসপোর্ট | Bangladesh Food Passport",
+  "short_name": "ফুড পাসপোর্ট",
+  "description": "বাংলাদেশের ৬৪ জেলার ঐতিহ্যবাহী খাবার চেখে দেখুন এবং সংগ্রহ করুন আপনার ডিজিটাল ফুড পাসপোর্ট স্ট্যাম্প!",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#022c22",
+  "theme_color": "#0d9488",
+  "orientation": "portrait",
+  "categories": ["food", "lifestyle", "travel"],
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

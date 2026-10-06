@@ -1,6 +1,7 @@
-import React from 'react';
-import { Sparkles, Moon, Sun, CreditCard, Award } from 'lucide-react';
+import React, { useState } from 'react';
+import { Moon, Sun, CreditCard, Award, Volume2, VolumeX } from 'lucide-react';
 import { getRank, toBengaliNumerals } from '../data/foods';
+import { isSoundEnabled, setSoundEnabled } from '../utils/audio';
 
 export default function Header({
   eatenCount,
@@ -13,6 +14,13 @@ export default function Header({
 }) {
   const rank = getRank(eatenCount);
   const percent = Math.round((eatenCount / 64) * 100);
+  const [soundOn, setSoundOn] = useState(() => isSoundEnabled());
+
+  const handleToggleSound = () => {
+    const next = !soundOn;
+    setSoundOn(next);
+    setSoundEnabled(next);
+  };
 
   return (
     <header className="w-full sticky top-0 z-40 px-3 sm:px-6 pt-2.5 sm:pt-3 pb-1.5 transition-colors">
@@ -39,7 +47,21 @@ export default function Header({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            {/* Stamp Sound FX Toggle Button */}
+            <button
+              onClick={handleToggleSound}
+              className="p-2 sm:p-2.5 rounded-2xl glass-pill hover:bg-white/80 dark:hover:bg-slate-800/80 text-slate-600 dark:text-slate-300 active:scale-95 transition"
+              title={soundOn ? "সাউন্ড অন (শব্দ বন্ধ করতে চাপুন)" : "সাউন্ড মিউট (শব্দ চালু করতে চাপুন)"}
+              aria-label="Toggle Sound"
+            >
+              {soundOn ? (
+                <Volume2 size={17} className="text-teal-600 dark:text-teal-400" />
+              ) : (
+                <VolumeX size={17} className="text-slate-400" />
+              )}
+            </button>
+
             {/* Minimalist Theme Toggle Button */}
             <button
               onClick={onToggleTheme}
@@ -53,7 +75,7 @@ export default function Header({
             {/* Liquid Card CTA Button */}
             <button
               onClick={onOpenCardModal}
-              className="liquid-btn-primary flex items-center gap-1.5 py-2 px-3.5 sm:px-4 rounded-2xl font-semibold text-xs sm:text-sm active:scale-95 transition"
+              className="liquid-btn-primary flex items-center gap-1.5 py-2 px-3 sm:px-4 rounded-2xl font-semibold text-xs sm:text-sm active:scale-95 transition"
             >
               <CreditCard size={15} />
               <span>আমার কার্ড</span>

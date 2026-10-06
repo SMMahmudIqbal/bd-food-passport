@@ -253,13 +253,24 @@ export default function App() {
       />
 
       {/* Minimal Liquid Glass Footer */}
-      <footer className="w-full border-t border-white/60 dark:border-white/5 py-6 text-center text-xs text-slate-400 dark:text-slate-500 space-y-1">
-        <p className="flex items-center justify-center gap-1.5 font-medium">
+      <footer className="w-full border-t border-white/60 dark:border-white/5 py-7 text-center text-xs text-slate-400 dark:text-slate-500 space-y-2">
+        <p className="flex items-center justify-center gap-1.5 font-medium text-slate-600 dark:text-slate-300">
           <span>বাংলাদেশের ঐতিহ্যবাহী খাবারের ভালোবাসায় নির্মিত</span>
           <Heart size={13} className="text-rose-500 fill-rose-500" />
         </p>
+        <p className="text-xs font-semibold text-teal-700 dark:text-teal-400">
+          Developed by{' '}
+          <a
+            href="https://github.com/SMMahmudIqbal"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline font-bold text-slate-800 dark:text-white"
+          >
+            S. M. Mahmud Iqbal
+          </a>
+        </p>
         <p className="text-[11px] text-slate-400 dark:text-slate-600">
-          মিনিমালিস্টিক লিকুইড গ্লাস থিম • ক্লায়েন্ট-সাইড স্ট্যাটিক অ্যাপ
+          মিনিমালিস্টিক লিকুইড গ্লাস থিম • PWA অফলাইন সাপোর্ট • জিরো ব্যাকএন্ড
         </p>
       </footer>
     </div>

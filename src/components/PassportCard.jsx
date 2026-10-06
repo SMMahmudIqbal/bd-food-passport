@@ -239,6 +239,10 @@ export default function PassportCard({
             <span className="font-semibold tracking-wide text-white">
               bd-food-passport.vercel.app
             </span>
+            <span className="text-white/40">•</span>
+            <span className="text-xs text-emerald-300/80 font-medium">
+              Developed by S. M. Mahmud Iqbal
+            </span>
           </div>
 
           <div className="text-right">
@@ -364,9 +368,11 @@ export default function PassportCard({
       </div>
 
       {/* Footer */}
-      <div className="relative z-10 pt-1.5 flex items-center justify-between text-[9px] text-emerald-300 border-t border-white/15">
-        <span>bd-food-passport.vercel.app</span>
-        <span className="text-[#d4af37] font-semibold">ভোজন পাসপোর্ট</span>
+      <div className="relative z-10 pt-1.5 flex items-center justify-between text-[8px] sm:text-[9px] text-emerald-300 border-t border-white/15">
+        <span className="truncate">bd-food-passport.vercel.app</span>
+        <span className="text-white/40">•</span>
+        <span className="text-emerald-300/80 truncate">Dev: S. M. Mahmud Iqbal</span>
+        <span className="text-[#d4af37] font-semibold shrink-0">ভোজন পাসপোর্ট</span>
       </div>
     </div>
   );
