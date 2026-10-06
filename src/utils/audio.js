@@ -27,8 +27,15 @@ export function setSoundEnabled(enabled) {
 function getAudioContext() {
   const AudioContextClass = window.AudioContext || window.webkitAudioContext;
   if (!AudioContextClass) return null;
-  if (!audioCtx || audioCtx.state === 'suspended') {
-    audioCtx = new AudioContextClass();
+  if (!audioCtx) {
+    try {
+      audioCtx = new AudioContextClass();
+    } catch {
+      return null;
+    }
+  }
+  if (audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume().catch(() => {});
   }
   return audioCtx;
 }

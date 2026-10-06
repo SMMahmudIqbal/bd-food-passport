@@ -43,13 +43,16 @@ export default function FoodSheet({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [prevDistrict.id, nextDistrict.id, onNavigate, onClose]);
 
-  // Touch Swipe-Down to Dismiss Handlers
-  const handleTouchStart = (e) => {
+  const isDraggingHandle = useRef(false);
+
+  // Touch Swipe-Down to Dismiss Handlers (Only active on top grab handle)
+  const handleHandleTouchStart = (e) => {
     touchStartY.current = e.touches[0].clientY;
+    isDraggingHandle.current = true;
   };
 
-  const handleTouchMove = (e) => {
-    if (touchStartY.current === null) return;
+  const handleHandleTouchMove = (e) => {
+    if (!isDraggingHandle.current || touchStartY.current === null) return;
     const currentY = e.touches[0].clientY;
     const diff = currentY - touchStartY.current;
     if (diff > 0) {
@@ -57,12 +60,19 @@ export default function FoodSheet({
     }
   };
 
-  const handleTouchEnd = () => {
-    if (dragOffset > 75) {
+  const handleHandleTouchEnd = () => {
+    if (isDraggingHandle.current && dragOffset > 75) {
       onClose();
     }
     setDragOffset(0);
     touchStartY.current = null;
+    isDraggingHandle.current = false;
+  };
+
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
   };
 
   const handleStampAction = () => {
@@ -87,19 +97,13 @@ export default function FoodSheet({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 backdrop-blur-md transition-opacity"
-      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 sm:backdrop-blur-sm transition-opacity"
+      onClick={handleBackdropClick}
     >
       <div
-        style={{
-          transform: `translateY(${dragOffset}px)`,
-          transition: dragOffset === 0 ? 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)' : 'none'
-        }}
-        className="w-full max-w-lg glass-panel rounded-t-[32px] sm:rounded-[32px] sm:mb-6 p-5 sm:p-6 shadow-2xl animate-sheet relative overflow-hidden max-h-[90vh] overflow-y-auto"
+        style={dragOffset > 0 ? { transform: `translateY(${dragOffset}px)` } : undefined}
+        className="w-full max-w-lg glass-panel rounded-t-[32px] sm:rounded-[32px] sm:mb-6 p-5 sm:p-6 shadow-2xl animate-sheet relative overflow-hidden max-h-[88vh] overflow-y-auto overscroll-contain"
         onClick={(e) => e.stopPropagation()}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
       >
         {/* Specular Top Border Glow Accent */}
         <div
@@ -107,8 +111,15 @@ export default function FoodSheet({
           style={{ background: theme.primaryBtn }}
         ></div>
 
-        {/* Drag handle */}
-        <div className="w-12 h-1.5 bg-slate-300/80 dark:bg-slate-700/80 rounded-full mx-auto mb-3 sm:hidden cursor-grab active:cursor-grabbing"></div>
+        {/* Drag handle area with comfortable touch target for mobile swipe-down */}
+        <div
+          className="w-full flex justify-center py-2.5 -mt-2 mb-2 sm:hidden touch-none cursor-grab active:cursor-grabbing select-none"
+          onTouchStart={handleHandleTouchStart}
+          onTouchMove={handleHandleTouchMove}
+          onTouchEnd={handleHandleTouchEnd}
+        >
+          <div className="w-12 h-1.5 bg-slate-300/80 dark:bg-slate-700/80 rounded-full" />
+        </div>
 
         {/* Header with district and close button */}
         <div className="flex items-start justify-between mb-3.5">

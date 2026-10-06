@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { DISTRICT_PATHS, MAP_WIDTH, MAP_HEIGHT } from '../data/districts-map';
 import { FOOD_BY_ID, toBengaliNumerals } from '../data/foods';
 import { getTheme } from '../data/themes';
@@ -28,6 +28,18 @@ export default function MapView({
       return Number(next.toFixed(2));
     });
   }, []);
+
+  // Bring selected district to top of SVG render stack so highlight border is unobstructed
+  const sortedDistricts = useMemo(() => {
+    if (!selectedDistrictId) return DISTRICT_PATHS;
+    const paths = [...DISTRICT_PATHS];
+    const selIdx = paths.findIndex((p) => p.id === selectedDistrictId);
+    if (selIdx > -1) {
+      const [selected] = paths.splice(selIdx, 1);
+      paths.push(selected);
+    }
+    return paths;
+  }, [selectedDistrictId]);
 
   const activeHoverDistrict = hoveredDistrictId ? FOOD_BY_ID[hoveredDistrictId] : null;
 
@@ -120,16 +132,10 @@ export default function MapView({
                 <stop offset="50%" stopColor={theme.mapFill2} />
                 <stop offset="100%" stopColor={theme.mapFill3} />
               </linearGradient>
-
-              {/* Luminous Glow Filter for Highlight */}
-              <filter id="liquidGlow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="6" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
             </defs>
 
             <g id="districts-layer">
-              {DISTRICT_PATHS.map((item) => {
+              {sortedDistricts.map((item) => {
                 const foodInfo = FOOD_BY_ID[item.id] || {};
                 const isEaten = eatenDistricts.has(item.id);
                 const isWishlisted = !isEaten && wishlistDistricts.has(item.id);
@@ -141,27 +147,25 @@ export default function MapView({
                   ? isWishlisted
                   : !filterDivision || foodInfo.divisionBn === filterDivision;
 
-                let fillColor = isEaten
+                const strokeWidth = isSelected ? '4.5' : isHovered ? '4' : isEaten ? '3.5' : isWishlisted ? '3.5' : '2.5';
+                const strokeDasharray = isWishlisted && !isSelected ? '6 4' : 'none';
+                const opacity = matchesFilter ? 1 : 0.25;
+
+                const fillColor = isEaten
                   ? `url(#liquidEatenGrad-${theme.id})`
                   : isWishlisted
-                  ? 'rgba(245, 158, 11, 0.28)'
+                  ? 'rgba(245, 158, 11, 0.35)'
+                  : isSelected
+                  ? 'rgba(244, 63, 94, 0.28)'
                   : 'currentColor';
 
-                let strokeColor = isEaten
+                const strokeColor = isSelected
+                  ? '#f43f5e'
+                  : isEaten
                   ? theme.mapStroke
                   : isWishlisted
                   ? '#f59e0b'
                   : 'rgba(148, 163, 184, 0.5)';
-
-                let strokeWidth = isSelected ? '10' : isHovered ? '7' : isEaten ? '4' : isWishlisted ? '4.5' : '3';
-                let strokeDasharray = isWishlisted ? '5 3' : 'none';
-                let opacity = matchesFilter ? 1 : 0.25;
-
-                if (isSelected) {
-                  strokeColor = '#f43f5e';
-                  strokeWidth = '12';
-                  strokeDasharray = 'none';
-                }
 
                 return (
                   <path
@@ -175,8 +179,9 @@ export default function MapView({
                     strokeLinejoin="round"
                     strokeLinecap="round"
                     opacity={opacity}
+                    style={{ WebkitTapHighlightColor: 'transparent' }}
                     className={`district-path ${
-                      !isEaten && !isWishlisted ? 'text-slate-200/80 dark:text-slate-800/80' : ''
+                      !isEaten && !isWishlisted && !isSelected ? 'text-slate-200/80 dark:text-slate-800/80' : ''
                     }`}
                     onClick={(e) => {
                       e.stopPropagation();

@@ -165,10 +165,16 @@ export default function PassportCardModal({
     setTimeout(() => setCopiedLink(false), 2500);
   };
 
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/50 backdrop-blur-md overflow-y-auto"
-      onClick={onClose}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/60 sm:backdrop-blur-sm overflow-y-auto"
+      onClick={handleBackdropClick}
     >
       <div
         className="w-full max-w-lg glass-panel rounded-[32px] shadow-2xl overflow-hidden my-auto animate-sheet"
