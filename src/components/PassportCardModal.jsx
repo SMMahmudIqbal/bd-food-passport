@@ -28,6 +28,7 @@ export default function PassportCardModal({
   onSelectTheme
 }) {
   const exportCardRef = useRef(null);
+  const [cardFormat, setCardFormat] = useState('post'); // 'post' | 'story' | 'boarding_pass'
   const [isExporting, setIsExporting] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [exportError, setExportError] = useState('');
@@ -37,7 +38,7 @@ export default function PassportCardModal({
   const eatenCount = eatenDistricts.size;
   const rank = getRank(eatenCount);
 
-  // Resize and compress uploaded photo to ensure fast rendering & safe localStorage quota
+  // Resize and compress uploaded photo
   const handlePhotoUpload = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -51,21 +52,17 @@ export default function PassportCardModal({
     reader.onload = (event) => {
       const img = new Image();
       img.onload = () => {
-        // Create an offscreen canvas to scale and center-crop to 400x400
         const canvas = document.createElement('canvas');
         const size = 400;
         canvas.width = size;
         canvas.height = size;
         const ctx = canvas.getContext('2d');
 
-        // Calculate aspect ratio crop
         const minDim = Math.min(img.width, img.height);
         const sx = (img.width - minDim) / 2;
         const sy = (img.height - minDim) / 2;
 
         ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size);
-
-        // Convert to web-optimized data URL
         const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.88);
         onUpdateUserPhoto(optimizedDataUrl);
       };
@@ -74,7 +71,11 @@ export default function PassportCardModal({
     reader.readAsDataURL(file);
   };
 
-  // Generate PNG & Download (Crisp 1080x1350)
+  const exportDimensions = cardFormat === 'story'
+    ? { width: 1080, height: 1920 }
+    : { width: 1080, height: 1350 };
+
+  // Generate PNG & Download
   const handleDownload = async () => {
     if (!exportCardRef.current || isExporting) return;
     setIsExporting(true);
@@ -87,16 +88,16 @@ export default function PassportCardModal({
       await new Promise((res) => setTimeout(res, 300));
 
       const dataUrl = await toPng(exportCardRef.current, {
-        width: 1080,
-        height: 1350,
-        canvasWidth: 1080,
-        canvasHeight: 1350,
+        width: exportDimensions.width,
+        height: exportDimensions.height,
+        canvasWidth: exportDimensions.width,
+        canvasHeight: exportDimensions.height,
         pixelRatio: 1,
         cacheBust: true
       });
 
       const link = document.createElement('a');
-      link.download = `bangladesh-food-passport-${userName || 'my-card'}-${themeId}.png`;
+      link.download = `bd-food-passport-${userName || 'card'}-${cardFormat}-${themeId}.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
@@ -120,17 +121,17 @@ export default function PassportCardModal({
       await new Promise((res) => setTimeout(res, 300));
 
       const blob = await toBlob(exportCardRef.current, {
-        width: 1080,
-        height: 1350,
-        canvasWidth: 1080,
-        canvasHeight: 1350,
+        width: exportDimensions.width,
+        height: exportDimensions.height,
+        canvasWidth: exportDimensions.width,
+        canvasHeight: exportDimensions.height,
         pixelRatio: 1,
         cacheBust: true
       });
 
       if (!blob) throw new Error('Failed to generate image blob');
 
-      const file = new File([blob], `bd-food-passport-${userName || 'card'}.png`, { type: 'image/png' });
+      const file = new File([blob], `bd-food-passport-${userName || 'card'}-${cardFormat}.png`, { type: 'image/png' });
       const shareData = {
         title: 'বাংলাদেশ ফুড পাসপোর্ট',
         text: `আমি বাংলাদেশের ৬৪ জেলার মধ্যে ${toBengaliNumerals(eatenCount)}টি জেলার ঐতিহ্যবাহী খাবার খেয়েছি! আমার ফুড র‍্যাঙ্ক: ${rank.titleBn}। আপনার পাসপোর্ট তৈরি করুন:`,
@@ -190,8 +191,44 @@ export default function PassportCardModal({
           </button>
         </div>
 
-        <div className="p-4 sm:p-5 max-h-[85vh] overflow-y-auto space-y-4">
-          {/* Minimalist Theme Color Palette Strip (Only Color Circles, No Names) */}
+        <div className="p-4 sm:p-5 max-h-[85vh] overflow-y-auto space-y-3.5">
+          {/* Card Format Selector Strip */}
+          <div className="glass-pill p-1.5 rounded-2xl flex items-center justify-between gap-1">
+            <button
+              onClick={() => setCardFormat('post')}
+              className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 ${
+                cardFormat === 'post'
+                  ? 'bg-white/80 dark:bg-slate-800/90 text-slate-900 dark:text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <span>🖼️ পোস্ট (৪:৫)</span>
+            </button>
+
+            <button
+              onClick={() => setCardFormat('story')}
+              className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 ${
+                cardFormat === 'story'
+                  ? 'bg-white/80 dark:bg-slate-800/90 text-slate-900 dark:text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <span>📱 স্টোরি (৯:১৬)</span>
+            </button>
+
+            <button
+              onClick={() => setCardFormat('boarding_pass')}
+              className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 ${
+                cardFormat === 'boarding_pass'
+                  ? 'bg-white/80 dark:bg-slate-800/90 text-slate-900 dark:text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <span>🎫 বোর্ডিং পাস</span>
+            </button>
+          </div>
+
+          {/* Minimalist Theme Color Palette Strip */}
           <div className="glass-pill p-3 rounded-2xl flex items-center justify-between gap-3">
             <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
               <Palette size={14} className="text-teal-600 dark:text-teal-400" />
@@ -281,18 +318,19 @@ export default function PassportCardModal({
               userName={userName}
               userPhoto={userPhoto}
               themeId={themeId}
+              cardFormat={cardFormat}
               isExport={false}
             />
           </div>
 
-          {/* Isolated Offscreen 1080x1350 Export Target (Fixed & Completely Out of Viewport Flow) */}
+          {/* Isolated Offscreen Export Target */}
           <div
             style={{
               position: 'fixed',
               left: '-9999px',
-              top: '-9999px',
-              width: '1080px',
-              height: '1350px',
+              top: '0',
+              width: `${exportDimensions.width}px`,
+              height: `${exportDimensions.height}px`,
               overflow: 'hidden',
               pointerEvents: 'none',
               zIndex: -9999
@@ -305,6 +343,7 @@ export default function PassportCardModal({
               userPhoto={userPhoto}
               cardRef={exportCardRef}
               themeId={themeId}
+              cardFormat={cardFormat}
               isExport={true}
             />
           </div>
@@ -330,7 +369,7 @@ export default function PassportCardModal({
               ) : (
                 <>
                   <Download size={16} />
-                  <span>PNG ডাউনলোড করুন</span>
+                  <span>PNG ডাউনলোড ({cardFormat === 'story' ? 'স্টোরি' : cardFormat === 'boarding_pass' ? 'বোর্ডিং পাস' : 'পোস্ট'})</span>
                 </>
               )}
             </button>

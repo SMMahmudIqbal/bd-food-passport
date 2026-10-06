@@ -6,6 +6,7 @@ import { ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 
 export default function MapView({
   eatenDistricts,
+  wishlistDistricts = new Set(),
   onSelectDistrict,
   selectedDistrictId,
   filterDivision,
@@ -108,17 +109,34 @@ export default function MapView({
               {DISTRICT_PATHS.map((item) => {
                 const foodInfo = FOOD_BY_ID[item.id] || {};
                 const isEaten = eatenDistricts.has(item.id);
+                const isWishlisted = !isEaten && wishlistDistricts.has(item.id);
                 const isSelected = selectedDistrictId === item.id;
-                const matchesFilter = !filterDivision || foodInfo.divisionBn === filterDivision;
+                
+                // If filtering by division OR wishlist
+                const matchesFilter = filterDivision === 'wishlist'
+                  ? isWishlisted
+                  : !filterDivision || foodInfo.divisionBn === filterDivision;
 
-                let fillColor = isEaten ? `url(#liquidEatenGrad-${theme.id})` : 'currentColor';
-                let strokeColor = isEaten ? theme.mapStroke : 'rgba(148, 163, 184, 0.5)';
-                let strokeWidth = isSelected ? '8' : isEaten ? '4' : '3';
-                let opacity = matchesFilter ? 1 : 0.3;
+                let fillColor = isEaten
+                  ? `url(#liquidEatenGrad-${theme.id})`
+                  : isWishlisted
+                  ? 'rgba(245, 158, 11, 0.28)'
+                  : 'currentColor';
+
+                let strokeColor = isEaten
+                  ? theme.mapStroke
+                  : isWishlisted
+                  ? '#f59e0b'
+                  : 'rgba(148, 163, 184, 0.5)';
+
+                let strokeWidth = isSelected ? '10' : isEaten ? '4' : isWishlisted ? '4.5' : '3';
+                let strokeDasharray = isWishlisted ? '5 3' : 'none';
+                let opacity = matchesFilter ? 1 : 0.25;
 
                 if (isSelected) {
                   strokeColor = '#f43f5e';
                   strokeWidth = '12';
+                  strokeDasharray = 'none';
                 }
 
                 return (
@@ -129,11 +147,12 @@ export default function MapView({
                     fill={fillColor}
                     stroke={strokeColor}
                     strokeWidth={strokeWidth}
+                    strokeDasharray={strokeDasharray}
                     strokeLinejoin="round"
                     strokeLinecap="round"
                     opacity={opacity}
                     className={`district-path ${
-                      !isEaten ? 'text-slate-200/80 dark:text-slate-800/80' : ''
+                      !isEaten && !isWishlisted ? 'text-slate-200/80 dark:text-slate-800/80' : ''
                     }`}
                     onClick={(e) => {
                       e.stopPropagation();
@@ -142,7 +161,7 @@ export default function MapView({
                     tabIndex={0}
                     role="button"
                     aria-label={`${foodInfo.nameBn || item.id} - ${foodInfo.foodBn || ''} (${
-                      isEaten ? 'খেয়েছি' : 'খাইনি'
+                      isEaten ? 'খেয়েছি' : isWishlisted ? 'খেতে চাই' : 'খাইনি'
                     })`}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
@@ -160,15 +179,25 @@ export default function MapView({
 
       {/* Mini Glass Legend Footer */}
       <div className="absolute bottom-3 left-3.5 right-3.5 z-20 flex items-center justify-between pointer-events-none">
-        <div className="flex items-center gap-3.5 glass-pill px-3.5 py-1.5 rounded-full text-[11px] text-slate-600 dark:text-slate-300 pointer-events-auto font-medium">
-          <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-3 glass-pill px-3.5 py-1.5 rounded-full text-[11px] text-slate-600 dark:text-slate-300 pointer-events-auto font-medium overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1.5 shrink-0">
             <span
               style={{ background: theme.primaryBtn }}
               className="w-2.5 h-2.5 rounded-full shadow-sm inline-block"
             ></span>
             <span>খেয়েছি ({toBengaliNumerals(eatenDistricts.size)})</span>
           </div>
-          <div className="flex items-center gap-1.5">
+
+          {wishlistDistricts.size > 0 && (
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80 border border-amber-400 inline-block shadow-sm"></span>
+              <span className="text-amber-600 dark:text-amber-400 font-semibold">
+                খেতে চাই ({toBengaliNumerals(wishlistDistricts.size)})
+              </span>
+            </div>
+          )}
+
+          <div className="flex items-center gap-1.5 shrink-0">
             <span className="w-2.5 h-2.5 rounded-full bg-slate-300/80 dark:bg-slate-700/80 inline-block"></span>
             <span>বাকি ({toBengaliNumerals(64 - eatenDistricts.size)})</span>
           </div>

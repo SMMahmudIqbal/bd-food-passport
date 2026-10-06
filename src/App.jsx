@@ -3,6 +3,7 @@ import Header from './components/Header';
 import MapView from './components/MapView';
 import FoodSheet from './components/FoodSheet';
 import DistrictList from './components/DistrictList';
+import BadgesSection from './components/BadgesSection';
 import PassportCardModal from './components/PassportCardModal';
 import { DISTRICTS_FOOD, getRank, toBengaliNumerals } from './data/foods';
 import { THEMES, getTheme } from './data/themes';
@@ -10,6 +11,7 @@ import { fireStampConfetti, fireMilestoneConfetti } from './utils/confetti';
 import { Sparkles, Utensils, Award, Compass, Heart } from 'lucide-react';
 
 const STORAGE_KEY_EATEN = 'bd_food_passport_eaten';
+const STORAGE_KEY_WISHLIST = 'bd_food_passport_wishlist';
 const STORAGE_KEY_USER_NAME = 'bd_food_passport_user_name';
 const STORAGE_KEY_USER_PHOTO = 'bd_food_passport_user_photo';
 const STORAGE_KEY_MODE = 'bd_food_passport_mode';
@@ -20,6 +22,16 @@ export default function App() {
   const [eatenDistricts, setEatenDistricts] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_EATEN);
+      return saved ? new Set(JSON.parse(saved)) : new Set();
+    } catch {
+      return new Set();
+    }
+  });
+
+  // Wishlist / Bucket list districts set
+  const [wishlistDistricts, setWishlistDistricts] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY_WISHLIST);
       return saved ? new Set(JSON.parse(saved)) : new Set();
     } catch {
       return new Set();
@@ -62,6 +74,15 @@ export default function App() {
       console.warn('Failed to save to localStorage:', e);
     }
   }, [eatenDistricts]);
+
+  // Persist Wishlist Districts
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY_WISHLIST, JSON.stringify([...wishlistDistricts]));
+    } catch (e) {
+      console.warn('Failed to save wishlist to localStorage:', e);
+    }
+  }, [wishlistDistricts]);
 
   // Persist User Name
   useEffect(() => {
@@ -120,6 +141,13 @@ export default function App() {
         next.delete(districtId);
       } else {
         next.add(districtId);
+        // Automatically remove from wishlist if eaten
+        setWishlistDistricts((wPrev) => {
+          const wNext = new Set(wPrev);
+          wNext.delete(districtId);
+          return wNext;
+        });
+
         fireStampConfetti();
 
         // Check for rank milestone
@@ -127,6 +155,19 @@ export default function App() {
         if ([11, 26, 41, 56, 64].includes(newCount)) {
           setTimeout(() => fireMilestoneConfetti(), 300);
         }
+      }
+      return next;
+    });
+  };
+
+  // Toggle wishlist status
+  const handleToggleWishlist = (districtId) => {
+    setWishlistDistricts((prev) => {
+      const next = new Set(prev);
+      if (next.has(districtId)) {
+        next.delete(districtId);
+      } else {
+        next.add(districtId);
       }
       return next;
     });
@@ -141,7 +182,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-x-hidden selection:bg-teal-500 selection:text-white transition-colors">
-      {/* Ambient Floating Liquid Mesh Orbs (Adapted to current color theme) */}
+      {/* Ambient Floating Liquid Mesh Orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
         <div
           className={`absolute -top-[12%] -left-[10%] w-[58vw] h-[58vw] max-w-[550px] max-h-[550px] rounded-full bg-gradient-to-tr ${activeTheme.ambientOrbs.orb1} blur-[95px] animate-liquid-1 transition-all duration-700`}
@@ -163,6 +204,7 @@ export default function App() {
         filterDivision={filterDivision}
         onFilterDivisionChange={setFilterDivision}
         divisions={divisions}
+        wishlistCount={wishlistDistricts.size}
         themeId={colorTheme}
         onSelectTheme={setColorTheme}
       />
@@ -173,6 +215,7 @@ export default function App() {
         <div id="map-container" className="scroll-mt-24">
           <MapView
             eatenDistricts={eatenDistricts}
+            wishlistDistricts={wishlistDistricts}
             onSelectDistrict={(id) => setSelectedDistrictId(id)}
             selectedDistrictId={selectedDistrictId}
             filterDivision={filterDivision}
@@ -259,11 +302,20 @@ export default function App() {
           </div>
         </div>
 
+        {/* Culinary Badges & Achievements Section */}
+        <BadgesSection
+          eatenDistricts={eatenDistricts}
+          onSelectDistrict={(id) => setSelectedDistrictId(id)}
+          themeId={colorTheme}
+        />
+
         {/* District Search & Complete Listing */}
         <DistrictList
           eatenDistricts={eatenDistricts}
+          wishlistDistricts={wishlistDistricts}
           onSelectDistrict={(id) => setSelectedDistrictId(id)}
           onToggleEaten={handleToggleEaten}
+          onToggleWishlist={handleToggleWishlist}
           filterDivision={filterDivision}
           themeId={colorTheme}
         />
@@ -275,11 +327,13 @@ export default function App() {
         onClose={() => setSelectedDistrictId(null)}
         isEaten={selectedDistrictId ? eatenDistricts.has(selectedDistrictId) : false}
         onToggleEaten={handleToggleEaten}
+        isWishlisted={selectedDistrictId ? wishlistDistricts.has(selectedDistrictId) : false}
+        onToggleWishlist={handleToggleWishlist}
         onNavigate={(id) => setSelectedDistrictId(id)}
         themeId={colorTheme}
       />
 
-      {/* Shareable 1080x1350 Passport Card Modal */}
+      {/* Shareable Passport Card Modal (Supports Post, Story 9:16, Boarding Pass) */}
       <PassportCardModal
         isOpen={isCardModalOpen}
         onClose={() => setIsCardModalOpen(false)}
@@ -311,7 +365,7 @@ export default function App() {
           </a>
         </p>
         <p className="text-[11px] text-slate-400 dark:text-slate-600">
-          মিনিমালিস্টিক লিকুইড গ্লাস থিম • ৫টি বাছাইযোগ্য কালার প্যালেট • PWA অফলাইন সাপোর্ট • জিরো ব্যাকএন্ড
+          মিনিমালিস্টিক লিকুইড গ্লাস থিম • ৫টি বাছাইযোগ্য কালার প্যালেট • বাকেট লিস্ট ও ব্যাজ • PWA অফলাইন সাপোর্ট
         </p>
       </footer>
     </div>

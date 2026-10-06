@@ -12,6 +12,7 @@ export default function Header({
   filterDivision,
   onFilterDivisionChange,
   divisions,
+  wishlistCount = 0,
   themeId = 'emerald',
   onSelectTheme
 }) {
@@ -202,6 +203,20 @@ export default function Header({
           >
             সব বিভাগ
           </button>
+
+          {wishlistCount > 0 && (
+            <button
+              onClick={() => onFilterDivisionChange(filterDivision === 'wishlist' ? '' : 'wishlist')}
+              className={`px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1 ${
+                filterDivision === 'wishlist'
+                  ? 'bg-amber-500 text-white shadow-sm'
+                  : 'glass-pill text-amber-600 dark:text-amber-400 hover:bg-amber-500/20'
+              }`}
+            >
+              <span>📌 খেতে চাই</span>
+              <span>({toBengaliNumerals(wishlistCount)})</span>
+            </button>
+          )}
           {divisions.map((div) => {
             const isActive = filterDivision === div;
             return (

@@ -1,12 +1,14 @@
 import React, { useState, useMemo } from 'react';
-import { Search, CheckCircle2, Circle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, CheckCircle2, Circle, ChevronDown, ChevronUp, Bookmark } from 'lucide-react';
 import { DISTRICTS_FOOD, toBengaliNumerals } from '../data/foods';
 import { getTheme } from '../data/themes';
 
 export default function DistrictList({
   eatenDistricts,
+  wishlistDistricts = new Set(),
   onSelectDistrict,
   onToggleEaten,
+  onToggleWishlist,
   filterDivision,
   themeId = 'emerald'
 }) {
@@ -17,8 +19,12 @@ export default function DistrictList({
 
   const filteredDistricts = useMemo(() => {
     return DISTRICTS_FOOD.filter((d) => {
-      const matchesDiv = !filterDivision || d.divisionBn === filterDivision;
-      if (!matchesDiv) return false;
+      // If filtering by wishlist
+      if (filterDivision === 'wishlist') {
+        if (!wishlistDistricts.has(d.id)) return false;
+      } else if (filterDivision && d.divisionBn !== filterDivision) {
+        return false;
+      }
 
       if (!search.trim()) return true;
       const q = search.toLowerCase();
@@ -31,7 +37,7 @@ export default function DistrictList({
         d.foodEn.toLowerCase().includes(q)
       );
     });
-  }, [filterDivision, search]);
+  }, [filterDivision, wishlistDistricts, search]);
 
   return (
     <div className="w-full glass-panel rounded-3xl p-4 sm:p-5 mt-4">
@@ -39,7 +45,7 @@ export default function DistrictList({
       <div className="flex items-center justify-between gap-3 mb-3">
         <div className="flex items-center gap-2">
           <h3 className="font-bold text-base text-slate-800 dark:text-white">
-            জেলার তালিকা
+            {filterDivision === 'wishlist' ? '📌 বাকেট লিস্টের জেলাসমূহ' : 'জেলার তালিকা'}
           </h3>
           <span className="text-xs font-semibold px-2 py-0.5 rounded-full glass-pill text-slate-600 dark:text-slate-300">
             {toBengaliNumerals(filteredDistricts.length)}টি
@@ -79,16 +85,20 @@ export default function DistrictList({
       {/* District Cards Grid */}
       <div
         className={`grid grid-cols-1 sm:grid-cols-2 gap-2.5 overflow-y-auto transition-all duration-300 ${
-          isExpanded ? 'max-h-[520px]' : 'max-h-[220px]'
+          isExpanded ? 'max-h-[520px]' : 'max-h-[240px]'
         }`}
       >
         {filteredDistricts.length === 0 ? (
           <div className="col-span-full py-8 text-center text-sm text-slate-400">
-            কোনো জেলা বা খাবার পাওয়া যায়নি
+            {filterDivision === 'wishlist'
+              ? 'আপনার বাকেট লিস্টে কোনো জেলা যোগ করা হয়নি। জেলা স্পর্শ করে "খেতে চাই 📌" বাটনে চাপুন!'
+              : 'কোনো জেলা বা খাবার পাওয়া যায়নি'}
           </div>
         ) : (
           filteredDistricts.map((item) => {
             const isEaten = eatenDistricts.has(item.id);
+            const isWishlisted = !isEaten && wishlistDistricts.has(item.id);
+
             return (
               <div
                 key={item.id}
@@ -96,6 +106,8 @@ export default function DistrictList({
                 className={`flex items-center justify-between p-3 rounded-2xl cursor-pointer glass-card-interactive ${
                   isEaten
                     ? 'bg-white/40 dark:bg-slate-800/40 border'
+                    : isWishlisted
+                    ? 'bg-amber-500/10 border border-amber-500/30 dark:bg-amber-950/20'
                     : 'glass-pill'
                 }`}
                 style={isEaten ? { borderColor: `${theme.accentColor}55` } : {}}
@@ -112,6 +124,11 @@ export default function DistrictList({
                       <span className="text-[10px] text-slate-400 dark:text-slate-500 truncate">
                         ({item.nameEn})
                       </span>
+                      {isWishlisted && (
+                        <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                          📌
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs text-slate-600 dark:text-slate-300 font-medium truncate">
                       {item.foodBn}
@@ -119,21 +136,47 @@ export default function DistrictList({
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onToggleEaten(item.id);
-                  }}
-                  className="p-2 rounded-xl shrink-0 ml-2 transition"
-                  title={isEaten ? "খেয়েছি (আনমার্ক করতে চাপুন)" : "চিহ্নিত করুন"}
-                >
-                  {isEaten ? (
-                    <CheckCircle2 size={20} style={{ color: theme.accentColor }} className="fill-current" />
-                  ) : (
-                    <Circle size={20} className="text-slate-300 dark:text-slate-600 hover:text-slate-500" />
+                <div className="flex items-center gap-1 shrink-0 ml-2">
+                  {/* Quick Wishlist Bookmark Toggle */}
+                  {!isEaten && onToggleWishlist && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onToggleWishlist(item.id);
+                      }}
+                      className={`p-1.5 rounded-xl transition ${
+                        isWishlisted
+                          ? 'text-amber-500 dark:text-amber-400'
+                          : 'text-slate-300 dark:text-slate-600 hover:text-amber-500'
+                      }`}
+                      title={isWishlisted ? 'বাকেট লিস্ট থেকে সরান' : 'খেতে চাই / বাকেট লিস্টে রাখুন'}
+                    >
+                      <Bookmark size={17} className={isWishlisted ? 'fill-amber-500' : ''} />
+                    </button>
                   )}
-                </button>
+
+                  {/* Eaten Check Toggle */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleEaten(item.id);
+                    }}
+                    className={`p-1.5 rounded-xl transition ${
+                      isEaten
+                        ? 'text-teal-500 dark:text-teal-400'
+                        : 'text-slate-300 dark:text-slate-600 hover:text-teal-500'
+                    }`}
+                    title={isEaten ? "খেয়েছি (আনমার্ক করতে চাপুন)" : "চিহ্নিত করুন"}
+                  >
+                    {isEaten ? (
+                      <CheckCircle2 size={20} style={{ color: theme.accentColor }} className="fill-current" />
+                    ) : (
+                      <Circle size={20} className="text-slate-300 dark:text-slate-600 hover:text-slate-500" />
+                    )}
+                  </button>
+                </div>
               </div>
             );
           })

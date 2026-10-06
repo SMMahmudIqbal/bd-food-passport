@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Check, ArrowRight, ArrowLeft, Sparkles, MapPin, Store } from 'lucide-react';
+import { X, Check, ArrowRight, ArrowLeft, Sparkles, MapPin, Store, Bookmark, ExternalLink } from 'lucide-react';
 import { DISTRICTS_FOOD, toBengaliNumerals } from '../data/foods';
 import { getTheme } from '../data/themes';
 import { playStampSound } from '../utils/audio';
@@ -9,6 +9,8 @@ export default function FoodSheet({
   onClose,
   isEaten,
   onToggleEaten,
+  isWishlisted,
+  onToggleWishlist,
   onNavigate,
   themeId = 'emerald'
 }) {
@@ -29,6 +31,10 @@ export default function FoodSheet({
     }
     onToggleEaten(district.id);
   };
+
+  const cleanShopSearch = district.famousShopBn
+    ? district.famousShopBn.split('(')[0].replace(/আদি|দোকান|বাজার/g, '').trim() + ' ' + district.nameBn
+    : district.nameBn + ' বিখ্যাত খাবার';
 
   return (
     <div
@@ -123,18 +129,31 @@ export default function FoodSheet({
           )}
         </div>
 
-        {/* Authentic Shop Recommendations Section ("আসল দোকান কোথায়?") */}
+        {/* Authentic Shop Recommendations Section with Google Maps Link */}
         {district.famousShopBn && (
-          <div className="mb-3.5 glass-pill p-3 sm:p-3.5 rounded-2xl flex items-start gap-2.5 border border-amber-500/25 bg-amber-500/5 dark:bg-amber-500/10">
-            <Store size={17} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-            <div className="min-w-0">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 block mb-0.5">
-                📍 আসল ও বিখ্যাত দোকান
-              </span>
-              <p className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 leading-snug">
-                {district.famousShopBn}
-              </p>
+          <div className="mb-3.5 glass-pill p-3 sm:p-3.5 rounded-2xl flex items-start justify-between gap-2.5 border border-amber-500/25 bg-amber-500/5 dark:bg-amber-500/10">
+            <div className="flex items-start gap-2.5 min-w-0">
+              <Store size={17} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 block mb-0.5">
+                  📍 আসল ও বিখ্যাত দোকান
+                </span>
+                <p className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-200 leading-snug">
+                  {district.famousShopBn}
+                </p>
+              </div>
             </div>
+
+            <a
+              href={`https://www.google.com/maps/search/${encodeURIComponent(cleanShopSearch)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0 px-2.5 py-1.5 rounded-xl text-xs font-bold text-amber-700 dark:text-amber-300 glass-pill hover:bg-amber-500/20 flex items-center gap-1 transition"
+              title="গুগল ম্যাপসে খুঁজুন"
+            >
+              <span>ম্যাপস</span>
+              <ExternalLink size={12} />
+            </a>
           </div>
         )}
 
@@ -143,35 +162,51 @@ export default function FoodSheet({
           {district.descriptionBn}
         </p>
 
-        {/* Action Button: খেয়েছি ✅ with audio FX */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleStampAction}
-            style={{ background: theme.primaryBtn }}
-            className="flex-1 py-3 px-5 rounded-2xl font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 liquid-btn-primary shadow-lg"
-          >
-            {isEaten ? (
-              <>
-                <Check size={18} className="stroke-[3]" />
-                <span>খেয়েছি ✅</span>
-              </>
-            ) : (
-              <>
-                <Sparkles size={18} />
-                <span>খেয়েছি ✅</span>
-              </>
-            )}
-          </button>
-
-          {isEaten && (
+        {/* Action Buttons: খেয়েছি ✅ and খেতে চাই 📌 */}
+        <div className="space-y-2.5">
+          <div className="flex items-center gap-2.5">
             <button
-              onClick={() => onToggleEaten(district.id)}
-              className="py-3 px-4 rounded-2xl font-medium text-xs text-rose-500 hover:text-rose-600 glass-pill hover:bg-rose-500/10 transition"
-              title="আনমার্ক করুন"
+              onClick={handleStampAction}
+              style={{ background: theme.primaryBtn }}
+              className="flex-1 py-3 px-5 rounded-2xl font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 liquid-btn-primary shadow-lg"
             >
-              মুছুন ✕
+              {isEaten ? (
+                <>
+                  <Check size={18} className="stroke-[3]" />
+                  <span>খেয়েছি ✅</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles size={18} />
+                  <span>খেয়েছি ✅</span>
+                </>
+              )}
             </button>
-          )}
+
+            {/* Wishlist / Bucket List Toggle Button */}
+            <button
+              onClick={() => onToggleWishlist && onToggleWishlist(district.id)}
+              className={`py-3 px-4 rounded-2xl font-bold text-xs sm:text-sm flex items-center gap-1.5 transition ${
+                isWishlisted
+                  ? 'bg-amber-500/20 border border-amber-500/40 text-amber-600 dark:text-amber-400 shadow-sm'
+                  : 'glass-pill text-slate-700 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-800/60'
+              }`}
+              title={isWishlisted ? 'বাকেট লিস্ট থেকে সরান' : 'খেতে চাই / বাকেট লিস্টে যোগ করুন'}
+            >
+              <Bookmark size={16} className={isWishlisted ? 'fill-amber-500 text-amber-500' : ''} />
+              <span>{isWishlisted ? 'লিস্টে আছে' : 'খেতে চাই 📌'}</span>
+            </button>
+
+            {isEaten && (
+              <button
+                onClick={() => onToggleEaten(district.id)}
+                className="py-3 px-3.5 rounded-2xl font-medium text-xs text-rose-500 hover:text-rose-600 glass-pill hover:bg-rose-500/10 transition"
+                title="আনমার্ক করুন"
+              >
+                মুছুন ✕
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Prev / Next Quick District Navigation */}
