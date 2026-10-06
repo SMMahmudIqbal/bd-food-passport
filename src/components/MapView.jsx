@@ -13,6 +13,7 @@ export default function MapView({
   themeId = 'emerald'
 }) {
   const [scale, setScale] = useState(1);
+  const [hoveredDistrictId, setHoveredDistrictId] = useState(null);
   const theme = getTheme(themeId);
 
   // Reset zoom
@@ -28,13 +29,15 @@ export default function MapView({
     });
   }, []);
 
+  const activeHoverDistrict = hoveredDistrictId ? FOOD_BY_ID[hoveredDistrictId] : null;
+
   return (
     <div className="relative w-full h-[62vh] sm:h-[68vh] glass-panel rounded-3xl overflow-hidden select-none flex flex-col justify-center items-center shadow-2xl">
       {/* Floating Glass Zoom Controls */}
       <div className="absolute top-3.5 right-3.5 z-20 flex flex-col gap-1.5 glass-panel p-1.5 rounded-2xl shadow-lg">
         <button
           onClick={() => handleZoom(0.25)}
-          className="p-2.5 rounded-xl hover:bg-white/80 dark:hover:bg-slate-700/80 active:scale-95 text-slate-700 dark:text-slate-200 transition"
+          className="p-2.5 rounded-xl hover:bg-white/80 dark:hover:bg-slate-700/80 active:scale-90 text-slate-700 dark:text-slate-200 transition"
           title="Zoom In"
           aria-label="Zoom In"
         >
@@ -42,7 +45,7 @@ export default function MapView({
         </button>
         <button
           onClick={() => handleZoom(-0.25)}
-          className="p-2.5 rounded-xl hover:bg-white/80 dark:hover:bg-slate-700/80 active:scale-95 text-slate-700 dark:text-slate-200 transition"
+          className="p-2.5 rounded-xl hover:bg-white/80 dark:hover:bg-slate-700/80 active:scale-90 text-slate-700 dark:text-slate-200 transition"
           title="Zoom Out"
           aria-label="Zoom Out"
         >
@@ -51,7 +54,7 @@ export default function MapView({
         {scale !== 1 && (
           <button
             onClick={handleReset}
-            className="p-2.5 rounded-xl hover:bg-white/80 dark:hover:bg-slate-700/80 active:scale-95 text-slate-700 dark:text-slate-200 transition animate-pop"
+            className="p-2.5 rounded-xl hover:bg-white/80 dark:hover:bg-slate-700/80 active:scale-90 text-slate-700 dark:text-slate-200 transition animate-pop"
             title="Reset Zoom"
             aria-label="Reset Zoom"
           >
@@ -74,6 +77,26 @@ export default function MapView({
         </span>
         <span>জেলা স্পর্শ করে স্বাদ দেখুন</span>
       </div>
+
+      {/* Floating Spotlight Preview on Hover / Tap */}
+      {activeHoverDistrict && (
+        <div className="absolute top-12 left-3.5 z-20 glass-panel py-1 px-3 rounded-2xl text-xs flex items-center gap-2 shadow-lg animate-pop pointer-events-none">
+          <span className="text-base">{activeHoverDistrict.emoji}</span>
+          <span className="font-bold text-slate-800 dark:text-white">{activeHoverDistrict.nameBn}:</span>
+          <span className="text-slate-600 dark:text-slate-300 truncate max-w-[140px] sm:max-w-[200px]">
+            {activeHoverDistrict.foodBn}
+          </span>
+          {eatenDistricts.has(activeHoverDistrict.id) ? (
+            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/15 px-1.5 py-0.5 rounded-md">
+              খেয়েছি ✓
+            </span>
+          ) : wishlistDistricts.has(activeHoverDistrict.id) ? (
+            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/15 px-1.5 py-0.5 rounded-md">
+              📌 খেতে চাই
+            </span>
+          ) : null}
+        </div>
+      )}
 
       {/* Fixed Stable Map Canvas (No touch drag/pan movement) */}
       <div className="w-full h-full flex items-center justify-center overflow-hidden touch-manipulation">
@@ -111,6 +134,7 @@ export default function MapView({
                 const isEaten = eatenDistricts.has(item.id);
                 const isWishlisted = !isEaten && wishlistDistricts.has(item.id);
                 const isSelected = selectedDistrictId === item.id;
+                const isHovered = hoveredDistrictId === item.id;
                 
                 // If filtering by division OR wishlist
                 const matchesFilter = filterDivision === 'wishlist'
@@ -129,7 +153,7 @@ export default function MapView({
                   ? '#f59e0b'
                   : 'rgba(148, 163, 184, 0.5)';
 
-                let strokeWidth = isSelected ? '10' : isEaten ? '4' : isWishlisted ? '4.5' : '3';
+                let strokeWidth = isSelected ? '10' : isHovered ? '7' : isEaten ? '4' : isWishlisted ? '4.5' : '3';
                 let strokeDasharray = isWishlisted ? '5 3' : 'none';
                 let opacity = matchesFilter ? 1 : 0.25;
 
@@ -158,6 +182,8 @@ export default function MapView({
                       e.stopPropagation();
                       onSelectDistrict(item.id);
                     }}
+                    onMouseEnter={() => setHoveredDistrictId(item.id)}
+                    onMouseLeave={() => setHoveredDistrictId(null)}
                     tabIndex={0}
                     role="button"
                     aria-label={`${foodInfo.nameBn || item.id} - ${foodInfo.foodBn || ''} (${

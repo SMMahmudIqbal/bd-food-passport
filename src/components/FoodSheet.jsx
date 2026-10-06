@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { X, Check, ArrowRight, ArrowLeft, Sparkles, MapPin, Store, Bookmark, ExternalLink } from 'lucide-react';
 import { DISTRICTS_FOOD, toBengaliNumerals } from '../data/foods';
 import { getTheme } from '../data/themes';
-import { playStampSound } from '../utils/audio';
+import { playStampSound, playBookmarkSound } from '../utils/audio';
 
 export default function FoodSheet({
   districtId,
@@ -14,6 +14,9 @@ export default function FoodSheet({
   onNavigate,
   themeId = 'emerald'
 }) {
+  const [dragOffset, setDragOffset] = useState(0);
+  const touchStartY = useRef(null);
+
   if (!districtId) return null;
 
   const district = DISTRICTS_FOOD.find((d) => d.id === districtId);
@@ -25,11 +28,57 @@ export default function FoodSheet({
   const prevDistrict = DISTRICTS_FOOD[(currentIndex - 1 + DISTRICTS_FOOD.length) % DISTRICTS_FOOD.length];
   const nextDistrict = DISTRICTS_FOOD[(currentIndex + 1) % DISTRICTS_FOOD.length];
 
+  // Keyboard Navigation: Arrow keys & Escape
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowLeft') {
+        onNavigate(prevDistrict.id);
+      } else if (e.key === 'ArrowRight') {
+        onNavigate(nextDistrict.id);
+      } else if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [prevDistrict.id, nextDistrict.id, onNavigate, onClose]);
+
+  // Touch Swipe-Down to Dismiss Handlers
+  const handleTouchStart = (e) => {
+    touchStartY.current = e.touches[0].clientY;
+  };
+
+  const handleTouchMove = (e) => {
+    if (touchStartY.current === null) return;
+    const currentY = e.touches[0].clientY;
+    const diff = currentY - touchStartY.current;
+    if (diff > 0) {
+      setDragOffset(diff);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (dragOffset > 75) {
+      onClose();
+    }
+    setDragOffset(0);
+    touchStartY.current = null;
+  };
+
   const handleStampAction = () => {
     if (!isEaten) {
       playStampSound();
     }
     onToggleEaten(district.id);
+  };
+
+  const handleWishlistAction = () => {
+    if (!isWishlisted) {
+      playBookmarkSound();
+    }
+    if (onToggleWishlist) {
+      onToggleWishlist(district.id);
+    }
   };
 
   const cleanShopSearch = district.famousShopBn
@@ -42,8 +91,15 @@ export default function FoodSheet({
       onClick={onClose}
     >
       <div
+        style={{
+          transform: `translateY(${dragOffset}px)`,
+          transition: dragOffset === 0 ? 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)' : 'none'
+        }}
         className="w-full max-w-lg glass-panel rounded-t-[32px] sm:rounded-[32px] sm:mb-6 p-5 sm:p-6 shadow-2xl animate-sheet relative overflow-hidden max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         {/* Specular Top Border Glow Accent */}
         <div
@@ -52,7 +108,7 @@ export default function FoodSheet({
         ></div>
 
         {/* Drag handle */}
-        <div className="w-10 h-1 bg-slate-300/80 dark:bg-slate-700/80 rounded-full mx-auto mb-3 sm:hidden"></div>
+        <div className="w-12 h-1.5 bg-slate-300/80 dark:bg-slate-700/80 rounded-full mx-auto mb-3 sm:hidden cursor-grab active:cursor-grabbing"></div>
 
         {/* Header with district and close button */}
         <div className="flex items-start justify-between mb-3.5">
@@ -80,7 +136,7 @@ export default function FoodSheet({
 
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-full glass-pill transition"
+            className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-full glass-pill transition active:scale-90"
             aria-label="Close"
           >
             <X size={18} />
@@ -148,7 +204,7 @@ export default function FoodSheet({
               href={`https://www.google.com/maps/search/${encodeURIComponent(cleanShopSearch)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="shrink-0 px-2.5 py-1.5 rounded-xl text-xs font-bold text-amber-700 dark:text-amber-300 glass-pill hover:bg-amber-500/20 flex items-center gap-1 transition"
+              className="shrink-0 px-2.5 py-1.5 rounded-xl text-xs font-bold text-amber-700 dark:text-amber-300 glass-pill hover:bg-amber-500/20 flex items-center gap-1 transition active:scale-95"
               title="গুগল ম্যাপসে খুঁজুন"
             >
               <span>ম্যাপস</span>
@@ -168,7 +224,7 @@ export default function FoodSheet({
             <button
               onClick={handleStampAction}
               style={{ background: theme.primaryBtn }}
-              className="flex-1 py-3 px-5 rounded-2xl font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 liquid-btn-primary shadow-lg"
+              className="flex-1 py-3 px-5 rounded-2xl font-bold text-sm sm:text-base flex items-center justify-center gap-2.5 liquid-btn-primary shadow-lg active:scale-[0.98] transition"
             >
               {isEaten ? (
                 <>
@@ -185,8 +241,8 @@ export default function FoodSheet({
 
             {/* Wishlist / Bucket List Toggle Button */}
             <button
-              onClick={() => onToggleWishlist && onToggleWishlist(district.id)}
-              className={`py-3 px-4 rounded-2xl font-bold text-xs sm:text-sm flex items-center gap-1.5 transition ${
+              onClick={handleWishlistAction}
+              className={`py-3 px-4 rounded-2xl font-bold text-xs sm:text-sm flex items-center gap-1.5 transition active:scale-[0.98] ${
                 isWishlisted
                   ? 'bg-amber-500/20 border border-amber-500/40 text-amber-600 dark:text-amber-400 shadow-sm'
                   : 'glass-pill text-slate-700 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-800/60'
@@ -200,7 +256,7 @@ export default function FoodSheet({
             {isEaten && (
               <button
                 onClick={() => onToggleEaten(district.id)}
-                className="py-3 px-3.5 rounded-2xl font-medium text-xs text-rose-500 hover:text-rose-600 glass-pill hover:bg-rose-500/10 transition"
+                className="py-3 px-3.5 rounded-2xl font-medium text-xs text-rose-500 hover:text-rose-600 glass-pill hover:bg-rose-500/10 transition active:scale-95"
                 title="আনমার্ক করুন"
               >
                 মুছুন ✕
@@ -213,15 +269,17 @@ export default function FoodSheet({
         <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/60 dark:border-white/5 text-xs text-slate-500 dark:text-slate-400">
           <button
             onClick={() => onNavigate(prevDistrict.id)}
-            className="flex items-center gap-1.5 hover:text-slate-800 dark:hover:text-slate-200 glass-pill px-3 py-1.5 rounded-xl transition"
+            className="flex items-center gap-1.5 hover:text-slate-800 dark:hover:text-slate-200 glass-pill px-3 py-1.5 rounded-xl transition active:scale-95"
           >
             <ArrowLeft size={13} />
             <span>পূর্ববর্তী: {prevDistrict.nameBn}</span>
           </button>
 
+          <span className="text-[10px] text-slate-400 hidden sm:inline">← কিবোর্ড তীর চিহ্ন →</span>
+
           <button
             onClick={() => onNavigate(nextDistrict.id)}
-            className="flex items-center gap-1.5 hover:text-slate-800 dark:hover:text-slate-200 glass-pill px-3 py-1.5 rounded-xl transition"
+            className="flex items-center gap-1.5 hover:text-slate-800 dark:hover:text-slate-200 glass-pill px-3 py-1.5 rounded-xl transition active:scale-95"
           >
             <span>পরবর্তী: {nextDistrict.nameBn}</span>
             <ArrowRight size={13} />

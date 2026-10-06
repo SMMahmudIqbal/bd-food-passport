@@ -5,9 +5,11 @@ import FoodSheet from './components/FoodSheet';
 import DistrictList from './components/DistrictList';
 import BadgesSection from './components/BadgesSection';
 import PassportCardModal from './components/PassportCardModal';
-import { DISTRICTS_FOOD, getRank, toBengaliNumerals } from './data/foods';
+import Toast from './components/Toast';
+import { DISTRICTS_FOOD, FOOD_BY_ID, getRank, toBengaliNumerals } from './data/foods';
 import { THEMES, getTheme } from './data/themes';
 import { fireStampConfetti, fireMilestoneConfetti } from './utils/confetti';
+import { playMilestoneSound } from './utils/audio';
 import { Sparkles, Utensils, Award, Compass, Heart } from 'lucide-react';
 
 const STORAGE_KEY_EATEN = 'bd_food_passport_eaten';
@@ -65,6 +67,11 @@ export default function App() {
   const [selectedDistrictId, setSelectedDistrictId] = useState(null);
   const [isCardModalOpen, setIsCardModalOpen] = useState(false);
   const [filterDivision, setFilterDivision] = useState('');
+  const [toast, setToast] = useState(null);
+
+  const showToast = (title, message = '', type = 'info') => {
+    setToast({ title, message, type });
+  };
 
   // Persist Eaten Districts
   useEffect(() => {
@@ -133,12 +140,14 @@ export default function App() {
 
   // Toggle district eaten status
   const handleToggleEaten = (districtId) => {
+    const district = FOOD_BY_ID[districtId];
     setEatenDistricts((prev) => {
       const next = new Set(prev);
       const wasEaten = next.has(districtId);
 
       if (wasEaten) {
         next.delete(districtId);
+        showToast('চিহ্ন মুছে ফেলা হয়েছে', district?.nameBn, 'info');
       } else {
         next.add(districtId);
         // Automatically remove from wishlist if eaten
@@ -150,10 +159,18 @@ export default function App() {
 
         fireStampConfetti();
 
-        // Check for rank milestone
         const newCount = next.size;
+        const newRank = getRank(newCount);
+
+        // Check for rank milestone
         if ([11, 26, 41, 56, 64].includes(newCount)) {
-          setTimeout(() => fireMilestoneConfetti(), 300);
+          setTimeout(() => {
+            fireMilestoneConfetti();
+            playMilestoneSound();
+            showToast('🏆 নতুন মর্যাদা আনলকড!', `${toBengaliNumerals(newCount)} জেলা সম্পন্ন! আপনি এখন ${newRank.titleBn}!`, 'milestone');
+          }, 300);
+        } else {
+          showToast('স্বাদ গ্রহণ সম্পন্ন! ✅', `${district?.nameBn} (${district?.foodBn}) যুক্ত হয়েছে`, 'eaten');
         }
       }
       return next;
@@ -162,12 +179,15 @@ export default function App() {
 
   // Toggle wishlist status
   const handleToggleWishlist = (districtId) => {
+    const district = FOOD_BY_ID[districtId];
     setWishlistDistricts((prev) => {
       const next = new Set(prev);
       if (next.has(districtId)) {
         next.delete(districtId);
+        showToast('বাকেট লিস্ট থেকে সরানো হয়েছে', district?.nameBn, 'info');
       } else {
         next.add(districtId);
+        showToast('📌 বাকেট লিস্টে যুক্ত হয়েছে!', `${district?.nameBn} (${district?.foodBn})`, 'wishlist');
       }
       return next;
     });
@@ -182,6 +202,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-x-hidden selection:bg-teal-500 selection:text-white transition-colors">
+      {/* Toast Feedback Notification */}
+      <Toast toast={toast} onClose={() => setToast(null)} />
+
       {/* Ambient Floating Liquid Mesh Orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
         <div
@@ -333,7 +356,7 @@ export default function App() {
         themeId={colorTheme}
       />
 
-      {/* Shareable Passport Card Modal (Supports Post, Story 9:16, Boarding Pass) */}
+      {/* Shareable Passport Card Modal */}
       <PassportCardModal
         isOpen={isCardModalOpen}
         onClose={() => setIsCardModalOpen(false)}
