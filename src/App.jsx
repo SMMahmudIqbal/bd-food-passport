@@ -345,29 +345,33 @@ export default function App() {
       </main>
 
       {/* District Food Details Bottom Sheet */}
-      <FoodSheet
-        districtId={selectedDistrictId}
-        onClose={() => setSelectedDistrictId(null)}
-        isEaten={selectedDistrictId ? eatenDistricts.has(selectedDistrictId) : false}
-        onToggleEaten={handleToggleEaten}
-        isWishlisted={selectedDistrictId ? wishlistDistricts.has(selectedDistrictId) : false}
-        onToggleWishlist={handleToggleWishlist}
-        onNavigate={(id) => setSelectedDistrictId(id)}
-        themeId={colorTheme}
-      />
+      {selectedDistrictId && (
+        <FoodSheet
+          districtId={selectedDistrictId}
+          onClose={() => setSelectedDistrictId(null)}
+          isEaten={eatenDistricts.has(selectedDistrictId)}
+          onToggleEaten={handleToggleEaten}
+          isWishlisted={wishlistDistricts.has(selectedDistrictId)}
+          onToggleWishlist={handleToggleWishlist}
+          onNavigate={(id) => setSelectedDistrictId(id)}
+          themeId={colorTheme}
+        />
+      )}
 
       {/* Shareable Passport Card Modal */}
-      <PassportCardModal
-        isOpen={isCardModalOpen}
-        onClose={() => setIsCardModalOpen(false)}
-        eatenDistricts={eatenDistricts}
-        userName={userName}
-        onUpdateUserName={setUserName}
-        userPhoto={userPhoto}
-        onUpdateUserPhoto={setUserPhoto}
-        themeId={colorTheme}
-        onSelectTheme={setColorTheme}
-      />
+      {isCardModalOpen && (
+        <PassportCardModal
+          isOpen={isCardModalOpen}
+          onClose={() => setIsCardModalOpen(false)}
+          eatenDistricts={eatenDistricts}
+          userName={userName}
+          onUpdateUserName={setUserName}
+          userPhoto={userPhoto}
+          onUpdateUserPhoto={setUserPhoto}
+          themeId={colorTheme}
+          onSelectTheme={setColorTheme}
+        />
+      )}
 
       {/* Minimal Liquid Glass Footer */}
       <footer className="w-full border-t border-white/60 dark:border-white/5 py-7 text-center text-xs text-slate-400 dark:text-slate-500 space-y-2">

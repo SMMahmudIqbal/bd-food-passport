@@ -16,20 +16,21 @@ export default function FoodSheet({
 }) {
   const [dragOffset, setDragOffset] = useState(0);
   const touchStartY = useRef(null);
+  const isDraggingHandle = useRef(false);
 
-  if (!districtId) return null;
-
-  const district = DISTRICTS_FOOD.find((d) => d.id === districtId);
-  if (!district) return null;
-
+  const district = districtId ? DISTRICTS_FOOD.find((d) => d.id === districtId) : null;
   const theme = getTheme(themeId);
 
-  const currentIndex = DISTRICTS_FOOD.findIndex((d) => d.id === districtId);
-  const prevDistrict = DISTRICTS_FOOD[(currentIndex - 1 + DISTRICTS_FOOD.length) % DISTRICTS_FOOD.length];
-  const nextDistrict = DISTRICTS_FOOD[(currentIndex + 1) % DISTRICTS_FOOD.length];
+  const currentIndex = districtId ? DISTRICTS_FOOD.findIndex((d) => d.id === districtId) : -1;
+  const prevDistrict =
+    currentIndex > -1 ? DISTRICTS_FOOD[(currentIndex - 1 + DISTRICTS_FOOD.length) % DISTRICTS_FOOD.length] : null;
+  const nextDistrict =
+    currentIndex > -1 ? DISTRICTS_FOOD[(currentIndex + 1) % DISTRICTS_FOOD.length] : null;
 
   // Keyboard Navigation: Arrow keys & Escape
   useEffect(() => {
+    if (!districtId || !prevDistrict || !nextDistrict) return;
+
     const handleKeyDown = (e) => {
       if (e.key === 'ArrowLeft') {
         onNavigate(prevDistrict.id);
@@ -41,9 +42,7 @@ export default function FoodSheet({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [prevDistrict.id, nextDistrict.id, onNavigate, onClose]);
-
-  const isDraggingHandle = useRef(false);
+  }, [districtId, prevDistrict?.id, nextDistrict?.id, onNavigate, onClose]);
 
   // Touch Swipe-Down to Dismiss Handlers (Only active on top grab handle)
   const handleHandleTouchStart = (e) => {
@@ -74,6 +73,8 @@ export default function FoodSheet({
       onClose();
     }
   };
+
+  if (!district) return null;
 
   const handleStampAction = () => {
     if (!isEaten) {

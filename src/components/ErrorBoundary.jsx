@@ -41,6 +41,11 @@ export default class ErrorBoundary extends React.Component {
             <p className="text-sm text-slate-300 leading-relaxed">
               অ্যাপটি চালু করতে একটি সাময়িক সমস্যা দেখা দিয়েছে। অনুগ্রহ করে পুনরায় চেষ্টা করুন।
             </p>
+            {this.state.error && (
+              <div className="text-[11px] font-mono text-rose-300/90 bg-rose-950/60 p-2.5 rounded-xl text-left overflow-x-auto border border-rose-500/20">
+                {String(this.state.error.message || this.state.error)}
+              </div>
+            )}
             <div className="pt-2 flex flex-col gap-2">
               <button
                 onClick={this.handleReload}
