@@ -205,16 +205,13 @@ export default function App() {
       {/* Toast Feedback Notification */}
       <Toast toast={toast} onClose={() => setToast(null)} />
 
-      {/* Ambient Floating Liquid Mesh Orbs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+      {/* High-Performance Static Ambient Background (Zero animation overhead, 90fps GPU optimized) */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10 opacity-70 dark:opacity-40">
         <div
-          className={`absolute -top-[12%] -left-[10%] w-[58vw] h-[58vw] max-w-[550px] max-h-[550px] rounded-full bg-gradient-to-tr ${activeTheme.ambientOrbs.orb1} blur-[95px] animate-liquid-1 transition-all duration-700`}
+          className={`absolute -top-[10%] -left-[10%] w-[50vw] h-[50vw] max-w-[480px] max-h-[480px] rounded-full bg-gradient-to-tr ${activeTheme.ambientOrbs.orb1} blur-[50px]`}
         />
         <div
-          className={`absolute top-[35%] -right-[15%] w-[62vw] h-[62vw] max-w-[580px] max-h-[580px] rounded-full bg-gradient-to-bl ${activeTheme.ambientOrbs.orb2} blur-[100px] animate-liquid-2 transition-all duration-700`}
-        />
-        <div
-          className={`absolute -bottom-[10%] left-[20%] w-[50vw] h-[50vw] max-w-[480px] max-h-[480px] rounded-full bg-gradient-to-t ${activeTheme.ambientOrbs.orb3} blur-[90px] transition-all duration-700`}
+          className={`absolute top-[40%] -right-[10%] w-[50vw] h-[50vw] max-w-[480px] max-h-[480px] rounded-full bg-gradient-to-bl ${activeTheme.ambientOrbs.orb2} blur-[50px]`}
         />
       </div>
 

@@ -1,5 +1,5 @@
 // Service Worker for Bangladesh Food Passport PWA
-const CACHE_NAME = 'bd-food-passport-v3';
+const CACHE_NAME = 'bd-food-passport-v4';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();

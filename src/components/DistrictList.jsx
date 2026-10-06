@@ -84,9 +84,10 @@ export default function DistrictList({
 
       {/* District Cards Grid */}
       <div
-        className={`grid grid-cols-1 sm:grid-cols-2 gap-2.5 overflow-y-auto transition-all duration-300 ${
-          isExpanded ? 'max-h-[520px]' : 'max-h-[240px]'
+        className={`grid grid-cols-1 sm:grid-cols-2 gap-2.5 overflow-y-auto overscroll-contain transition-all duration-200 ${
+          isExpanded ? 'max-h-[540px]' : 'max-h-[260px]'
         }`}
+        style={{ WebkitOverflowScrolling: 'touch' }}
       >
         {filteredDistricts.length === 0 ? (
           <div className="col-span-full py-8 text-center text-sm text-slate-400">

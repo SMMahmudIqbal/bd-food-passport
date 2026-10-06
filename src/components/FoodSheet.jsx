@@ -178,7 +178,7 @@ export default function FoodSheet({
 
           {/* Official Passport Stamp Graphic when Eaten */}
           {isEaten && (
-            <div className="absolute right-3 -bottom-2 sm:right-5 sm:bottom-2 pointer-events-none transform rotate-[-10deg] animate-stamp">
+            <div className="absolute right-3 -bottom-2 sm:right-5 sm:bottom-2 pointer-events-none transform rotate-[-8deg]">
               <div
                 style={{ borderColor: theme.accentColor }}
                 className="border border-dashed rounded-xl px-2.5 py-1 glass-panel shadow-md flex flex-col items-center"

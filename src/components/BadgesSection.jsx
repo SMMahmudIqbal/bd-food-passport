@@ -131,7 +131,7 @@ export default function BadgesSection({
 
               {/* Expanded District Pills */}
               {isExpanded && badge.districts && (
-                <div className="mt-2.5 pt-2 border-t border-white/40 dark:border-white/5 space-y-1.5 animate-pop">
+                <div className="mt-2.5 pt-2 border-t border-white/40 dark:border-white/5 space-y-1.5">
                   <div className="flex flex-wrap gap-1.5">
                     {badge.districts.map((dId) => {
                       const dInfo = FOOD_BY_ID[dId];

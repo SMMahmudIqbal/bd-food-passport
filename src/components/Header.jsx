@@ -98,7 +98,7 @@ export default function Header({
               </button>
 
               {showThemeMenu && (
-                <div className="absolute right-0 top-full mt-2 glass-panel rounded-2xl p-2 shadow-2xl z-50 animate-pop flex items-center gap-1.5">
+                <div className="absolute right-0 top-full mt-2 glass-panel rounded-2xl p-2 shadow-2xl z-50 flex items-center gap-1.5">
                   {THEMES.map((t) => {
                     const isSelected = t.id === themeId;
                     return (

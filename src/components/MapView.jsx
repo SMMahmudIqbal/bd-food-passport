@@ -66,7 +66,7 @@ export default function MapView({
         {scale !== 1 && (
           <button
             onClick={handleReset}
-            className="p-2.5 rounded-xl hover:bg-white/80 dark:hover:bg-slate-700/80 active:scale-90 text-slate-700 dark:text-slate-200 transition animate-pop"
+            className="p-2.5 rounded-xl hover:bg-white/80 dark:hover:bg-slate-700/80 active:scale-90 text-slate-700 dark:text-slate-200 transition"
             title="Reset Zoom"
             aria-label="Reset Zoom"
           >
@@ -77,22 +77,16 @@ export default function MapView({
 
       {/* Floating Glass Instruction Capsule */}
       <div className="absolute top-3.5 left-3.5 z-20 flex items-center gap-2 glass-pill py-1.5 px-3 rounded-full text-xs font-semibold text-slate-700 dark:text-slate-300 pointer-events-none">
-        <span className="flex h-2 w-2 relative">
-          <span
-            style={{ backgroundColor: theme.accentColor }}
-            className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-          ></span>
-          <span
-            style={{ backgroundColor: theme.accentColor }}
-            className="relative inline-flex rounded-full h-2 w-2"
-          ></span>
-        </span>
+        <span
+          style={{ backgroundColor: theme.accentColor }}
+          className="inline-flex rounded-full h-2 w-2 shadow-sm"
+        />
         <span>জেলা স্পর্শ করে স্বাদ দেখুন</span>
       </div>
 
       {/* Floating Spotlight Preview on Hover / Tap */}
       {activeHoverDistrict && (
-        <div className="absolute top-12 left-3.5 z-20 glass-panel py-1 px-3 rounded-2xl text-xs flex items-center gap-2 shadow-lg animate-pop pointer-events-none">
+        <div className="absolute top-12 left-3.5 z-20 glass-panel py-1 px-3 rounded-2xl text-xs flex items-center gap-2 shadow-md pointer-events-none">
           <span className="text-base">{activeHoverDistrict.emoji}</span>
           <span className="font-bold text-slate-800 dark:text-white">{activeHoverDistrict.nameBn}:</span>
           <span className="text-slate-600 dark:text-slate-300 truncate max-w-[140px] sm:max-w-[200px]">
@@ -116,7 +110,8 @@ export default function MapView({
           style={{
             transform: `scale(${scale})`,
             transformOrigin: 'center center',
-            transition: 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)'
+            transition: 'transform 0.18s ease-out',
+            willChange: 'transform'
           }}
           className="w-full h-full max-w-full max-h-full flex items-center justify-center pointer-events-auto"
         >
