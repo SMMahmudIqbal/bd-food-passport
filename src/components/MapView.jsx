@@ -1,15 +1,18 @@
 import React, { useState, useCallback } from 'react';
 import { DISTRICT_PATHS, MAP_WIDTH, MAP_HEIGHT } from '../data/districts-map';
 import { FOOD_BY_ID, toBengaliNumerals } from '../data/foods';
+import { getTheme } from '../data/themes';
 import { ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 
 export default function MapView({
   eatenDistricts,
   onSelectDistrict,
   selectedDistrictId,
-  filterDivision
+  filterDivision,
+  themeId = 'emerald'
 }) {
   const [scale, setScale] = useState(1);
+  const theme = getTheme(themeId);
 
   // Reset zoom
   const handleReset = useCallback(() => {
@@ -59,8 +62,14 @@ export default function MapView({
       {/* Floating Glass Instruction Capsule */}
       <div className="absolute top-3.5 left-3.5 z-20 flex items-center gap-2 glass-pill py-1.5 px-3 rounded-full text-xs font-semibold text-slate-700 dark:text-slate-300 pointer-events-none">
         <span className="flex h-2 w-2 relative">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
+          <span
+            style={{ backgroundColor: theme.accentColor }}
+            className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+          ></span>
+          <span
+            style={{ backgroundColor: theme.accentColor }}
+            className="relative inline-flex rounded-full h-2 w-2"
+          ></span>
         </span>
         <span>জেলা স্পর্শ করে স্বাদ দেখুন</span>
       </div>
@@ -81,11 +90,11 @@ export default function MapView({
             style={{ maxHeight: '92%' }}
           >
             <defs>
-              {/* Liquid Luminous Gradient for Eaten Districts */}
-              <linearGradient id="liquidEatenGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#0d9488" />
-                <stop offset="50%" stopColor="#06b6d4" />
-                <stop offset="100%" stopColor="#0284c7" />
+              {/* Dynamic Theme Luminous Gradient for Eaten Districts */}
+              <linearGradient id={`liquidEatenGrad-${theme.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor={theme.mapFill1} />
+                <stop offset="50%" stopColor={theme.mapFill2} />
+                <stop offset="100%" stopColor={theme.mapFill3} />
               </linearGradient>
 
               {/* Luminous Glow Filter for Highlight */}
@@ -102,8 +111,8 @@ export default function MapView({
                 const isSelected = selectedDistrictId === item.id;
                 const matchesFilter = !filterDivision || foodInfo.divisionBn === filterDivision;
 
-                let fillColor = isEaten ? 'url(#liquidEatenGrad)' : 'currentColor';
-                let strokeColor = isEaten ? '#38bdf8' : 'rgba(148, 163, 184, 0.5)';
+                let fillColor = isEaten ? `url(#liquidEatenGrad-${theme.id})` : 'currentColor';
+                let strokeColor = isEaten ? theme.mapStroke : 'rgba(148, 163, 184, 0.5)';
                 let strokeWidth = isSelected ? '8' : isEaten ? '4' : '3';
                 let opacity = matchesFilter ? 1 : 0.3;
 
@@ -153,7 +162,10 @@ export default function MapView({
       <div className="absolute bottom-3 left-3.5 right-3.5 z-20 flex items-center justify-between pointer-events-none">
         <div className="flex items-center gap-3.5 glass-pill px-3.5 py-1.5 rounded-full text-[11px] text-slate-600 dark:text-slate-300 pointer-events-auto font-medium">
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-gradient-to-tr from-teal-500 to-sky-400 shadow-sm inline-block"></span>
+            <span
+              style={{ background: theme.primaryBtn }}
+              className="w-2.5 h-2.5 rounded-full shadow-sm inline-block"
+            ></span>
             <span>খেয়েছি ({toBengaliNumerals(eatenDistricts.size)})</span>
           </div>
           <div className="flex items-center gap-1.5">

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { Moon, Sun, CreditCard, Award, Volume2, VolumeX } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Moon, Sun, CreditCard, Award, Volume2, VolumeX, Palette, Check } from 'lucide-react';
 import { getRank, toBengaliNumerals } from '../data/foods';
 import { isSoundEnabled, setSoundEnabled } from '../utils/audio';
+import { THEMES, getTheme } from '../data/themes';
 
 export default function Header({
   eatenCount,
@@ -10,17 +11,36 @@ export default function Header({
   onToggleTheme,
   filterDivision,
   onFilterDivisionChange,
-  divisions
+  divisions,
+  themeId = 'emerald',
+  onSelectTheme
 }) {
   const rank = getRank(eatenCount);
   const percent = Math.round((eatenCount / 64) * 100);
   const [soundOn, setSoundOn] = useState(() => isSoundEnabled());
+  const [showThemeMenu, setShowThemeMenu] = useState(false);
+  const themeMenuRef = useRef(null);
+
+  const theme = getTheme(themeId);
 
   const handleToggleSound = () => {
     const next = !soundOn;
     setSoundOn(next);
     setSoundEnabled(next);
   };
+
+  // Close theme menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (themeMenuRef.current && !themeMenuRef.current.contains(e.target)) {
+        setShowThemeMenu(false);
+      }
+    };
+    if (showThemeMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showThemeMenu]);
 
   return (
     <header className="w-full sticky top-0 z-40 px-3 sm:px-6 pt-2.5 sm:pt-3 pb-1.5 transition-colors">
@@ -29,7 +49,10 @@ export default function Header({
         <div className="flex items-center justify-between gap-3 mb-3">
           <div className="flex items-center gap-3">
             {/* Liquid Glow Icon Container */}
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-teal-500/90 via-emerald-500/80 to-sky-500/90 p-[1px] shadow-lg shadow-teal-500/20 shrink-0">
+            <div
+              style={{ background: theme.primaryBtn }}
+              className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl p-[1px] shadow-lg shrink-0 transition-all"
+            >
               <div className="w-full h-full rounded-[15px] bg-white/30 dark:bg-slate-900/40 backdrop-blur-md flex items-center justify-center text-xl select-none">
                 🍲
               </div>
@@ -56,26 +79,73 @@ export default function Header({
               aria-label="Toggle Sound"
             >
               {soundOn ? (
-                <Volume2 size={17} className="text-teal-600 dark:text-teal-400" />
+                <Volume2 size={17} style={{ color: theme.accentColor }} />
               ) : (
                 <VolumeX size={17} className="text-slate-400" />
               )}
             </button>
 
-            {/* Minimalist Theme Toggle Button */}
+            {/* Theme Palette Switcher */}
+            <div className="relative" ref={themeMenuRef}>
+              <button
+                onClick={() => setShowThemeMenu((prev) => !prev)}
+                className="p-2 sm:p-2.5 rounded-2xl glass-pill hover:bg-white/80 dark:hover:bg-slate-800/80 text-slate-600 dark:text-slate-300 active:scale-95 transition"
+                title={`থিম: ${theme.nameBn} (পরিবর্তন করতে চাপুন)`}
+                aria-label="Change Color Theme"
+              >
+                <Palette size={17} style={{ color: theme.accentColor }} />
+              </button>
+
+              {showThemeMenu && (
+                <div className="absolute right-0 top-full mt-2 w-48 glass-panel rounded-2xl p-2 shadow-2xl z-50 animate-pop space-y-1">
+                  <div className="px-2 py-1 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                    থিম পছন্দ করুন
+                  </div>
+                  {THEMES.map((t) => {
+                    const isSelected = t.id === themeId;
+                    return (
+                      <button
+                        key={t.id}
+                        onClick={() => {
+                          onSelectTheme && onSelectTheme(t.id);
+                          setShowThemeMenu(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-semibold transition ${
+                          isSelected
+                            ? 'bg-white/70 dark:bg-slate-800/80 text-slate-900 dark:text-white shadow-sm'
+                            : 'hover:bg-white/40 dark:hover:bg-slate-800/40 text-slate-600 dark:text-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="w-3.5 h-3.5 rounded-full inline-block shadow-sm"
+                            style={{ background: t.primaryBtn }}
+                          ></span>
+                          <span>{t.nameBn}</span>
+                        </div>
+                        {isSelected && <Check size={13} style={{ color: theme.accentColor }} />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Minimalist Dark/Light Mode Toggle Button */}
             <button
               onClick={onToggleTheme}
               className="p-2 sm:p-2.5 rounded-2xl glass-pill hover:bg-white/80 dark:hover:bg-slate-800/80 text-slate-600 dark:text-slate-300 active:scale-95 transition"
               title={isDarkMode ? "লাইট মোড" : "ডার্ক মোড"}
               aria-label="Toggle Theme"
             >
-              {isDarkMode ? <Sun size={17} className="text-amber-400" /> : <Moon size={17} className="text-teal-600" />}
+              {isDarkMode ? <Sun size={17} className="text-amber-400" /> : <Moon size={17} style={{ color: theme.accentColor }} />}
             </button>
 
             {/* Liquid Card CTA Button */}
             <button
               onClick={onOpenCardModal}
-              className="liquid-btn-primary flex items-center gap-1.5 py-2 px-3 sm:px-4 rounded-2xl font-semibold text-xs sm:text-sm active:scale-95 transition"
+              style={{ background: theme.primaryBtn }}
+              className="liquid-btn-primary flex items-center gap-1.5 py-2 px-3 sm:px-4 rounded-2xl font-semibold text-xs sm:text-sm active:scale-95 transition shadow-md"
             >
               <CreditCard size={15} />
               <span>আমার কার্ড</span>
@@ -108,7 +178,10 @@ export default function Header({
                 <span>{rank.titleBn}</span>
               </div>
 
-              <span className="text-xs font-bold text-teal-600 dark:text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded-lg border border-teal-500/20">
+              <span
+                style={{ color: theme.accentColor }}
+                className="text-xs font-bold bg-white/50 dark:bg-slate-900/50 px-2 py-0.5 rounded-lg border border-white/40 dark:border-white/10"
+              >
                 {toBengaliNumerals(percent)}%
               </span>
             </div>
@@ -117,38 +190,42 @@ export default function Header({
           {/* Liquid Tube Progress Bar */}
           <div className="w-full liquid-progress-track h-2 rounded-full overflow-hidden p-[1px]">
             <div
-              className="h-full liquid-progress-bar rounded-full transition-all duration-500 ease-out"
-              style={{ width: `${Math.max(percent, 2.5)}%` }}
+              className={`h-full rounded-full transition-all duration-500 ease-out bg-gradient-to-r ${theme.progressBar}`}
+              style={{ width: `${Math.max(percent, 2)}%` }}
             ></div>
           </div>
         </div>
 
-        {/* Liquid Division Filter Pills */}
-        <div className="flex items-center gap-1.5 mt-2.5 overflow-x-auto no-scrollbar pb-0.5">
+        {/* Division Filter Strip (Horizontal scrolling on small screens) */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pt-2.5 pb-0.5 no-scrollbar">
           <button
             onClick={() => onFilterDivisionChange('')}
-            className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
+            className={`px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
               filterDivision === ''
-                ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-950 shadow-md scale-100 font-semibold'
-                : 'glass-pill text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-slate-800/70'
+                ? 'shadow-sm text-white'
+                : 'glass-pill text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-700/60'
             }`}
+            style={filterDivision === '' ? { background: theme.primaryBtn } : {}}
           >
             সব বিভাগ
           </button>
-
-          {divisions.map((divName) => (
-            <button
-              key={divName}
-              onClick={() => onFilterDivisionChange(divName)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
-                filterDivision === divName
-                  ? 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-md font-semibold'
-                  : 'glass-pill text-slate-600 dark:text-slate-300 hover:bg-white/70 dark:hover:bg-slate-800/70'
-              }`}
-            >
-              {divName}
-            </button>
-          ))}
+          {divisions.map((div) => {
+            const isActive = filterDivision === div;
+            return (
+              <button
+                key={div}
+                onClick={() => onFilterDivisionChange(div)}
+                className={`px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                  isActive
+                    ? 'shadow-sm text-white'
+                    : 'glass-pill text-slate-600 dark:text-slate-300 hover:bg-white/60 dark:hover:bg-slate-700/60'
+                }`}
+                style={isActive ? { background: theme.primaryBtn } : {}}
+              >
+                {div}
+              </button>
+            );
+          })}
         </div>
       </div>
     </header>

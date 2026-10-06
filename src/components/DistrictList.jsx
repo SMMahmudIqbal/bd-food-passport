@@ -1,15 +1,19 @@
 import React, { useState, useMemo } from 'react';
 import { Search, CheckCircle2, Circle, ChevronDown, ChevronUp } from 'lucide-react';
 import { DISTRICTS_FOOD, toBengaliNumerals } from '../data/foods';
+import { getTheme } from '../data/themes';
 
 export default function DistrictList({
   eatenDistricts,
   onSelectDistrict,
   onToggleEaten,
-  filterDivision
+  filterDivision,
+  themeId = 'emerald'
 }) {
   const [search, setSearch] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const theme = getTheme(themeId);
 
   const filteredDistricts = useMemo(() => {
     return DISTRICTS_FOOD.filter((d) => {
@@ -21,6 +25,8 @@ export default function DistrictList({
       return (
         d.nameBn.includes(q) ||
         d.nameEn.toLowerCase().includes(q) ||
+        d.divisionBn.includes(q) ||
+        d.divisionEn.toLowerCase().includes(q) ||
         d.foodBn.includes(q) ||
         d.foodEn.toLowerCase().includes(q)
       );
@@ -42,7 +48,8 @@ export default function DistrictList({
 
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center gap-1 text-xs font-semibold text-teal-600 dark:text-teal-400 hover:underline glass-pill px-2.5 py-1 rounded-xl transition"
+          style={{ color: theme.accentColor }}
+          className="flex items-center gap-1 text-xs font-semibold hover:underline glass-pill px-2.5 py-1 rounded-xl transition"
         >
           <span>{isExpanded ? 'সংক্ষিপ্ত করুন' : 'সব দেখুন'}</span>
           {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -56,7 +63,7 @@ export default function DistrictList({
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="জেলা বা খাবারের নাম দিয়ে খুঁজুন (যেমন: বগুড়া, রসমালাই, আম)..."
+          placeholder="জেলা বা খাবারের নাম দিয়ে খুঁজুন (যেমন: বগুড়া, রসমালাই, আম, ঢাকা)..."
           className="w-full pl-9 pr-4 py-2.5 rounded-2xl text-xs sm:text-sm glass-pill focus:outline-none focus:ring-2 focus:ring-teal-500/50 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 transition"
         />
         {search && (
@@ -88,9 +95,10 @@ export default function DistrictList({
                 onClick={() => onSelectDistrict(item.id)}
                 className={`flex items-center justify-between p-3 rounded-2xl cursor-pointer glass-card-interactive ${
                   isEaten
-                    ? 'bg-teal-500/10 border border-teal-500/30 dark:bg-teal-950/30 dark:border-teal-500/20'
+                    ? 'bg-white/40 dark:bg-slate-800/40 border'
                     : 'glass-pill'
                 }`}
+                style={isEaten ? { borderColor: `${theme.accentColor}55` } : {}}
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="text-2xl select-none shrink-0 w-8 text-center">
@@ -117,14 +125,14 @@ export default function DistrictList({
                     e.stopPropagation();
                     onToggleEaten(item.id);
                   }}
-                  className={`p-2 rounded-xl shrink-0 ml-2 transition ${
-                    isEaten
-                      ? 'text-teal-500 dark:text-teal-400'
-                      : 'text-slate-300 dark:text-slate-600 hover:text-teal-500'
-                  }`}
+                  className="p-2 rounded-xl shrink-0 ml-2 transition"
                   title={isEaten ? "খেয়েছি (আনমার্ক করতে চাপুন)" : "চিহ্নিত করুন"}
                 >
-                  {isEaten ? <CheckCircle2 size={20} className="fill-teal-500 text-white" /> : <Circle size={20} />}
+                  {isEaten ? (
+                    <CheckCircle2 size={20} style={{ color: theme.accentColor }} className="fill-current" />
+                  ) : (
+                    <Circle size={20} className="text-slate-300 dark:text-slate-600 hover:text-slate-500" />
+                  )}
                 </button>
               </div>
             );

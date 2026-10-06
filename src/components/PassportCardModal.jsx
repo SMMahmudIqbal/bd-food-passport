@@ -8,10 +8,13 @@ import {
   Trash2,
   Copy,
   ExternalLink,
-  Loader2
+  Loader2,
+  Palette,
+  Check
 } from 'lucide-react';
 import PassportCard from './PassportCard';
 import { getRank, toBengaliNumerals } from '../data/foods';
+import { THEMES } from '../data/themes';
 
 export default function PassportCardModal({
   isOpen,
@@ -20,7 +23,9 @@ export default function PassportCardModal({
   userName,
   onUpdateUserName,
   userPhoto,
-  onUpdateUserPhoto
+  onUpdateUserPhoto,
+  themeId = 'emerald',
+  onSelectTheme
 }) {
   const exportCardRef = useRef(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -32,7 +37,7 @@ export default function PassportCardModal({
   const eatenCount = eatenDistricts.size;
   const rank = getRank(eatenCount);
 
-  // Handle Local Photo Upload
+  // Resize and compress uploaded photo to ensure fast rendering & safe localStorage quota
   const handlePhotoUpload = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -44,7 +49,27 @@ export default function PassportCardModal({
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      onUpdateUserPhoto(event.target.result);
+      const img = new Image();
+      img.onload = () => {
+        // Create an offscreen canvas to scale and center-crop to 400x400
+        const canvas = document.createElement('canvas');
+        const size = 400;
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        // Calculate aspect ratio crop
+        const minDim = Math.min(img.width, img.height);
+        const sx = (img.width - minDim) / 2;
+        const sy = (img.height - minDim) / 2;
+
+        ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size);
+
+        // Convert to web-optimized data URL
+        const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.88);
+        onUpdateUserPhoto(optimizedDataUrl);
+      };
+      img.src = event.target.result;
     };
     reader.readAsDataURL(file);
   };
@@ -59,7 +84,7 @@ export default function PassportCardModal({
       if (document.fonts) {
         await document.fonts.ready;
       }
-      await new Promise((res) => setTimeout(res, 250));
+      await new Promise((res) => setTimeout(res, 300));
 
       const dataUrl = await toPng(exportCardRef.current, {
         width: 1080,
@@ -71,7 +96,7 @@ export default function PassportCardModal({
       });
 
       const link = document.createElement('a');
-      link.download = `bangladesh-food-passport-${userName || 'my-card'}.png`;
+      link.download = `bangladesh-food-passport-${userName || 'my-card'}-${themeId}.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
@@ -92,7 +117,7 @@ export default function PassportCardModal({
       if (document.fonts) {
         await document.fonts.ready;
       }
-      await new Promise((res) => setTimeout(res, 250));
+      await new Promise((res) => setTimeout(res, 300));
 
       const blob = await toBlob(exportCardRef.current, {
         width: 1080,
@@ -141,7 +166,7 @@ export default function PassportCardModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/40 backdrop-blur-md overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/50 backdrop-blur-md overflow-y-auto"
       onClick={onClose}
     >
       <div
@@ -159,12 +184,54 @@ export default function PassportCardModal({
           <button
             onClick={onClose}
             className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-full glass-pill transition"
+            aria-label="Close"
           >
             <X size={18} />
           </button>
         </div>
 
-        <div className="p-4 sm:p-5 max-h-[84vh] overflow-y-auto space-y-4">
+        <div className="p-4 sm:p-5 max-h-[85vh] overflow-y-auto space-y-4">
+          {/* Theme Selector Strip */}
+          <div className="glass-pill p-3 rounded-2xl space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <Palette size={14} className="text-teal-600 dark:text-teal-400" />
+                <span>কার্ডের থিম বাছাই করুন</span>
+              </span>
+              <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                {THEMES.find((t) => t.id === themeId)?.nameBn}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+              {THEMES.map((theme) => {
+                const isSelected = theme.id === themeId;
+                return (
+                  <button
+                    key={theme.id}
+                    onClick={() => onSelectTheme && onSelectTheme(theme.id)}
+                    className={`py-1.5 px-1 sm:px-2 rounded-xl text-center flex flex-col items-center gap-1 transition-all ${
+                      isSelected
+                        ? 'ring-2 ring-teal-500 bg-white/70 dark:bg-slate-800/80 shadow-md scale-102'
+                        : 'glass-pill hover:bg-white/50 dark:hover:bg-slate-800/50 opacity-80'
+                    }`}
+                    title={theme.nameBn}
+                  >
+                    <div
+                      className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] shadow-sm relative"
+                      style={{ background: theme.primaryBtn }}
+                    >
+                      {isSelected && <Check size={11} className="text-white stroke-[3]" />}
+                    </div>
+                    <span className="text-[10px] font-semibold text-slate-700 dark:text-slate-200 truncate w-full">
+                      {theme.nameBn}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* User Inputs (Name & Photo) */}
           <div className="glass-pill p-3.5 rounded-2xl space-y-2.5">
             <div>
@@ -186,9 +253,15 @@ export default function PassportCardModal({
                 আপনার ছবি (ঐচ্ছিক - শুধুই আপনার ফোনে সংরক্ষিত)
               </label>
               <div className="flex items-center gap-2.5">
+                {userPhoto && (
+                  <div className="w-9 h-9 rounded-xl border border-teal-500/40 overflow-hidden shrink-0 shadow-sm">
+                    <img src={userPhoto} alt="Preview" className="w-full h-full object-cover" />
+                  </div>
+                )}
+
                 <label className="liquid-btn-primary flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition shadow-sm">
                   <Camera size={13} />
-                  <span>{userPhoto ? 'ছবি পরিবর্তন করুন' : 'ছবি আপলোড করুন'}</span>
+                  <span>{userPhoto ? 'ছবি পরিবর্তন' : 'ছবি আপলোড করুন'}</span>
                   <input
                     type="file"
                     accept="image/*"
@@ -211,23 +284,39 @@ export default function PassportCardModal({
           </div>
 
           {/* Responsive Preview inside modal */}
-          <div className="w-full max-w-[320px] xs:max-w-[340px] sm:max-w-[360px] mx-auto shadow-2xl rounded-3xl overflow-hidden">
+          <div className="w-full max-w-[340px] mx-auto shadow-2xl rounded-3xl overflow-hidden">
             <PassportCard
               eatenDistricts={eatenDistricts}
               userName={userName}
               userPhoto={userPhoto}
+              themeId={themeId}
               isExport={false}
             />
           </div>
 
-          {/* Hidden/Offscreen 1080x1350 Export Target */}
-          <PassportCard
-            eatenDistricts={eatenDistricts}
-            userName={userName}
-            userPhoto={userPhoto}
-            cardRef={exportCardRef}
-            isExport={true}
-          />
+          {/* Isolated Offscreen 1080x1350 Export Target (Fixed & Completely Out of Viewport Flow) */}
+          <div
+            style={{
+              position: 'fixed',
+              left: '-9999px',
+              top: '-9999px',
+              width: '1080px',
+              height: '1350px',
+              overflow: 'hidden',
+              pointerEvents: 'none',
+              zIndex: -9999
+            }}
+            aria-hidden="true"
+          >
+            <PassportCard
+              eatenDistricts={eatenDistricts}
+              userName={userName}
+              userPhoto={userPhoto}
+              cardRef={exportCardRef}
+              themeId={themeId}
+              isExport={true}
+            />
+          </div>
 
           {exportError && (
             <div className="p-2.5 bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-300 text-xs rounded-xl text-center font-medium">
