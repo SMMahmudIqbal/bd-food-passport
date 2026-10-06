@@ -97,10 +97,7 @@ export default function Header({
               </button>
 
               {showThemeMenu && (
-                <div className="absolute right-0 top-full mt-2 w-48 glass-panel rounded-2xl p-2 shadow-2xl z-50 animate-pop space-y-1">
-                  <div className="px-2 py-1 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                    থিম পছন্দ করুন
-                  </div>
+                <div className="absolute right-0 top-full mt-2 glass-panel rounded-2xl p-2 shadow-2xl z-50 animate-pop flex items-center gap-1.5">
                   {THEMES.map((t) => {
                     const isSelected = t.id === themeId;
                     return (
@@ -110,20 +107,16 @@ export default function Header({
                           onSelectTheme && onSelectTheme(t.id);
                           setShowThemeMenu(false);
                         }}
-                        className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-semibold transition ${
+                        className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${
                           isSelected
-                            ? 'bg-white/70 dark:bg-slate-800/80 text-slate-900 dark:text-white shadow-sm'
-                            : 'hover:bg-white/40 dark:hover:bg-slate-800/40 text-slate-600 dark:text-slate-300'
+                            ? 'scale-110 shadow-md ring-2 ring-white dark:ring-slate-900 ring-offset-2'
+                            : 'hover:scale-105 opacity-80 hover:opacity-100 shadow-sm'
                         }`}
+                        style={{ background: t.primaryBtn }}
+                        title={t.nameBn}
+                        aria-label={t.nameEn}
                       >
-                        <div className="flex items-center gap-2">
-                          <span
-                            className="w-3.5 h-3.5 rounded-full inline-block shadow-sm"
-                            style={{ background: t.primaryBtn }}
-                          ></span>
-                          <span>{t.nameBn}</span>
-                        </div>
-                        {isSelected && <Check size={13} style={{ color: theme.accentColor }} />}
+                        {isSelected && <Check size={13} className="text-white stroke-[3]" />}
                       </button>
                     );
                   })}

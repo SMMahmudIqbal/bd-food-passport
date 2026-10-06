@@ -191,41 +191,32 @@ export default function PassportCardModal({
         </div>
 
         <div className="p-4 sm:p-5 max-h-[85vh] overflow-y-auto space-y-4">
-          {/* Theme Selector Strip */}
-          <div className="glass-pill p-3 rounded-2xl space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                <Palette size={14} className="text-teal-600 dark:text-teal-400" />
-                <span>কার্ডের থিম বাছাই করুন</span>
-              </span>
-              <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                {THEMES.find((t) => t.id === themeId)?.nameBn}
-              </span>
-            </div>
+          {/* Minimalist Theme Color Palette Strip (Only Color Circles, No Names) */}
+          <div className="glass-pill p-3 rounded-2xl flex items-center justify-between gap-3">
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+              <Palette size={14} className="text-teal-600 dark:text-teal-400" />
+              <span>কার্ডের থিম</span>
+            </span>
 
-            <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+            <div className="flex items-center gap-2 sm:gap-2.5">
               {THEMES.map((theme) => {
                 const isSelected = theme.id === themeId;
                 return (
                   <button
                     key={theme.id}
                     onClick={() => onSelectTheme && onSelectTheme(theme.id)}
-                    className={`py-1.5 px-1 sm:px-2 rounded-xl text-center flex flex-col items-center gap-1 transition-all ${
+                    className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all relative ${
                       isSelected
-                        ? 'ring-2 ring-teal-500 bg-white/70 dark:bg-slate-800/80 shadow-md scale-102'
-                        : 'glass-pill hover:bg-white/50 dark:hover:bg-slate-800/50 opacity-80'
+                        ? 'scale-110 shadow-lg ring-2 ring-white dark:ring-slate-900 ring-offset-2'
+                        : 'hover:scale-105 opacity-80 hover:opacity-100 shadow-sm'
                     }`}
+                    style={{ background: theme.primaryBtn }}
                     title={theme.nameBn}
+                    aria-label={theme.nameEn}
                   >
-                    <div
-                      className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] shadow-sm relative"
-                      style={{ background: theme.primaryBtn }}
-                    >
-                      {isSelected && <Check size={11} className="text-white stroke-[3]" />}
-                    </div>
-                    <span className="text-[10px] font-semibold text-slate-700 dark:text-slate-200 truncate w-full">
-                      {theme.nameBn}
-                    </span>
+                    {isSelected && (
+                      <Check size={14} className="text-white stroke-[3] drop-shadow" />
+                    )}
                   </button>
                 );
               })}
@@ -242,7 +233,7 @@ export default function PassportCardModal({
                 type="text"
                 value={userName}
                 onChange={(e) => onUpdateUserName(e.target.value)}
-                placeholder="নাম লিখুন (যেমন: তানভীর আহমেদ)"
+                placeholder="নাম লিখুন (যেমন: রুপাই)"
                 className="w-full px-3.5 py-2 rounded-xl text-xs sm:text-sm glass-pill focus:outline-none focus:ring-2 focus:ring-teal-500/50 text-slate-800 dark:text-white"
                 maxLength={30}
               />
