@@ -1,154 +1,124 @@
-# 🍲 বাংলাদেশ ফুড পাসপোর্ট (Bangladesh Food Passport)
+# Bangladesh Food Passport (বাংলাদেশ ফুড পাসপোর্ট)
 
-একটি মোবাইল-ফার্স্ট, ক্লায়েন্ট-সাইড সিঙ্গেল পেজ ওয়েব অ্যাপ্লিকেশন (SPA) যা বাংলাদেশের ৬৪ জেলার ঐতিহাসিক ও ঐতিহ্যবাহী খাবার ঘুরে ঘুরে টেস্ট করা এবং পাসপোর্ট স্ট্যাম্প সংগ্রহের আনন্দ এনে দেয়। 
+> **Developed by S. M. Mahmud Iqbal**  
+> *Interactive Culinary Exploration and Digital Passport Engine across 64 Districts of Bangladesh*
 
-কোনো ব্যাকএন্ড বা ডেটাবেস সার্ভারের প্রয়োজন নেই — এটি সম্পূর্ণ ব্রাউজারে চলে এবং Vercel-এ একদম বিনামূল্যে হোস্ট করা যায়।
-
----
-
-## ✨ প্রধান বৈশিষ্ট্যসমূহ (Key Features)
-
-1. **ইন্টারেক্টিভ ৬৪ জেলার মানচিত্র (Interactive Map):**
-   - ভেক্টর SVG মানচিত্রে বাংলাদেশের প্রতিটি জেলা নিখুঁতভাবে প্রদর্শিত।
-   - মোবাইল স্ক্রিনে পিঞ্চ-টু-জুম (Pinch-to-zoom), প্যান (Pan), এবং জুম কন্ট্রোল বাটন।
-2. **সিগনেচার খাবার ও স্ট্যাম্প (District Food Sheet):**
-   - যেকোনো জেলায় ট্যাপ করলেই নিচের ড্রয়ার শিটে জেলার নাম, বিভাগ, বিখ্যাত খাবার (বাংলা ও ইংরেজি), ইমোজি এবং ঐতিহাসিক বর্ণনা খোলে।
-   - **"খেয়েছি ✅"** বাটনে ট্যাপ করলে রাবার স্ট্যাম্প অ্যানিমেশন ও রঙিন কনফেটি সহ স্ট্যাম্প পড়ে।
-   - খেয়ে ফেলা জেলাগুলো উজ্জ্বল টিল/নীল গ্রেডিয়েন্টে রূপ নেয় এবং বাকি জেলাগুলো শান্ত ছাই রঙে থাকে।
-3. **লাইভ কাউন্টার ও অগ্রগতি (Progress & Counter):**
-   - রিয়েলটাইম **X/৬৪** কাউন্টার (বাংলা সংখ্যায় যেমন: ২৫/৬৪) এবং অ্যানিমেটেড প্রগ্রেস বার।
-4. **৫টি মর্যাদা স্তর / র‍্যাঙ্ক (Ranks):**
-   - **০–১০ জেলা:** শুরু (Beginner)
-   - **১১–২৫ জেলা:** ফুড এক্সপ্লোরার (Food Explorer)
-   - **২৬–৪০ জেলা:** ভোজনরসিক (Foodie)
-   - **৪১–৫৫ জেলা:** ফুড মাস্টার (Food Master)
-   - **৫৬–৬৪ জেলা:** কিংবদন্তি (Legend)
-5. **১০৮০x১৩৫০ সোশ্যাল পাসপোর্ট কার্ড (Shareable Card Generator):**
-   - ব্যবহারকারীর নাম ও প্রোফাইল ছবি (সম্পূর্ণ অফলাইনে লোকাল ব্রাউজারে প্রসেস করা)।
-   - ইনস্টাগ্রাম/ফেসবুকের জন্য অপ্টিমাইজড ৪:৫ অ্যাসপেক্ট রেশিও (১০৮০x১৩৫০ পিক্সেল) পাসপোর্ট কার্ড।
-   - কার্ডে থাকবে পাসপোর্ট নম্বর, ইস্যুর তারিখ, র‍্যাঙ্ক সিল, রঙিন মানচিত্র, কাউন্টার ও শতকরা অগ্রগতি।
-   - **PNG ডাউনলোড**, **Web Share API** (সরাসরি ইনস্টাগ্রাম/ফেসবুক/হোয়াটসঅ্যাপে শেয়ার) ও কপি লিংক অপশন।
-6. **অফলাইন প্রিজারভেশন (Privacy & Local Storage):**
-   - `localStorage`-এ অগ্রগতি সংরক্ষিত থাকে, ফলে ব্যবহারকারী ফিরে এলেও আগের স্ট্যাম্পগুলো অক্ষত থাকে।
-7. **ডার্ক ও লাইট মোড (Dark/Light Theme):**
-   - দিন ও রাত উভয় পরিবেশেই আরামদায়ক ভিউ।
-8. **ডিপ-লিংক সাপোর্ট (`#make` URL Hash):**
-   - সরাসরি `#make` হ্যাশ যুক্ত লিংকে ঢুকলে কার্ড ক্রিয়েশন মোডাল খুলে যায়।
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-bd--food--passport.vercel.app-0d9488?style=for-the-badge&logo=vercel&logoColor=white)](https://bd-food-passport.vercel.app)
+[![GitHub](https://img.shields.io/badge/GitHub-Repository-0f172a?style=for-the-badge&logo=github)](https://github.com/SMMahmudIqbal/bd-food-passport)
+[![Author](https://img.shields.io/badge/Developed%20By-S.%20M.%20Mahmud%20Iqbal-6366f1?style=for-the-badge)](https://github.com/SMMahmudIqbal)
+[![License](https://img.shields.io/badge/License-MIT-64748b?style=for-the-badge)](LICENSE)
 
 ---
 
-## 🛠️ প্রযুক্তি স্ট্যাক (Tech Stack)
+## Overview
 
-- **ফ্রেমওয়ার্ক:** React 19 + Vite 6
-- **স্টাইলিং:** Tailwind CSS (Custom color palette, responsive design, animations)
-- **টাইপোগ্রাফি:** Hind Siliguri (Google Fonts)
-- **আইকন:** Lucide React
-- **কার্ড এক্সপোর্ট:** `html-to-image` (1080x1350 High-Res Canvas rendering)
-- **কনফেটি ইফেক্ট:** `canvas-confetti`
+**Bangladesh Food Passport** is a client-side Single Page Application (SPA) designed to celebrate the culinary heritage of Bangladesh across all 64 districts. Users can explore authentic regional delicacies on an interactive SVG vector map, log personal food discovery journeys with animated passport stamps, track completion milestones across 5 tiers of mastery, and generate high-resolution exportable social media passport cards.
+
+The application runs entirely client-side with zero tracking, local persistence via Web Storage, full mobile responsiveness, and zero recurring server dependencies.
 
 ---
 
-## 🚀 লোকাল ডেভেলপমেন্ট (Local Setup)
+## Key Features
+
+1. **Interactive Vector Map**:
+   - High-fidelity SVG map rendering all 64 administrative districts of Bangladesh.
+   - Fluid mobile touch support with pinch-to-zoom, panning, and dedicated zoom controls.
+2. **District Culinary Database and Rubber Stamp Feedback**:
+   - Responsive bottom sheet drawer presenting district name, division, signature dish (bilingual), and historical background.
+   - Interactive stamp action with tactile sound feedback, rubber stamp impression animation, and celebratory confetti.
+   - Real-time map colorization shifting visited districts to vibrant teal while leaving unexplored regions neutral.
+3. **Real-Time Progress Tracking**:
+   - Dynamic progress metrics tracking visited districts (e.g., 25/64) with native Bengali numeral support and animated progress indicators.
+4. **Mastery Ranking System**:
+   - Tier 1 (0 to 10 Districts): Beginner (শুরু)
+   - Tier 2 (11 to 25 Districts): Food Explorer (ফুড এক্সপ্লোরার)
+   - Tier 3 (26 to 40 Districts): Foodie (ভোজনরসিক)
+   - Tier 4 (41 to 55 Districts): Food Master (ফুড মাস্টার)
+   - Tier 5 (56 to 64 Districts): Legend (কিংবদন্তি)
+5. **High-Resolution Passport Card Exporter**:
+   - Generates 1080x1350 pixel social sharing cards (4:5 ratio) optimized for Instagram and Facebook Stories.
+   - Includes custom traveler name, profile image (processed strictly on-device), passport serial, issue timestamp, official stamp seals, and customized map illustration.
+   - One-click PNG download, Web Share API integration, and deep-link copying.
+6. **Local-First Privacy**:
+   - All journey records are preserved locally via `localStorage`. No remote account or telemetry required.
+7. **Accessibility and Theme Support**:
+   - Adaptive dark and light themes with high-contrast text rendering.
+   - Deep-linking support via `#make` URL hash for direct card creation modal navigation.
+
+---
+
+## Tech Stack
+
+- **Framework**: React 19 + Vite 6
+- **Styling**: Tailwind CSS with custom responsive utilities
+- **Typography**: Hind Siliguri (Google Fonts)
+- **Icons**: Lucide React
+- **Canvas and Export**: `html-to-image` for high-resolution 1080x1350 rendering
+- **Celebration Effects**: `canvas-confetti`
+- **Hosting**: Vercel
+
+---
+
+## Local Setup
 
 ```bash
-# প্রজেক্ট ফোল্ডারে প্রবেশ করুন
+# Clone the repository
+git clone https://github.com/SMMahmudIqbal/bd-food-passport.git
 cd bd-food-passport
 
-# ডিপেন্ডেন্সি ইনস্টল করুন
+# Install dependencies
 npm install
 
-# ডেভেলপমেন্ট সার্ভার চালু করুন
+# Start development server
 npm run dev
 ```
 
-ব্রাউজারে `http://localhost:3000` ওপেন করুন।
+Open `http://localhost:3000` in any modern web browser.
 
-প্রোডাকশন বিল্ড তৈরি করতে:
+To create an optimized production build:
 ```bash
 npm run build
 ```
-ফাইলগুলো `dist/` ফোল্ডারে সংকলিত হবে।
+Compiled production assets are output to the `dist/` directory.
 
 ---
 
-## 🚀 GitHub-এ অটো-ডিপ্লয়মেন্ট (Auto Deploy to GitHub Pages)
+## Deployment
 
-এই প্রজেক্টে GitHub Actions-এর মাধ্যমে সম্পূর্ণ স্বয়ংক্রিয় সিআই/সিডি (CI/CD) অটো-ডিপ্লয়মেন্ট সিস্টেম কনফিগার করা হয়েছে। আপনি GitHub-এ কোড পুশ করলেই এটি স্বয়ংক্রিয়ভাবে প্রোডাকশন বিল্ড তৈরি করে **GitHub Pages**-এ লাইভ ডিপ্লয় করে দিবে!
+### Vercel Deployment
 
-### প্রথমবার চালুর নির্দেশিকা:
-1. GitHub-এ একটি নতুন রিপোজিটরি তৈরি করুন (যেমন: `bd-food-passport`)।
-2. আপনার রিপোজিটরির **Settings** > **Pages**-এ যান:
-   - **Build and deployment > Source** ড্রপডাউনে **"GitHub Actions"** নির্বাচন করুন।
-3. প্রজেক্টের রুট থেকে ডিপ্লয় স্ক্রিপ্টটি চালান:
-   ```powershell
-   .\deploy-to-github.ps1
-   ```
-   (অথবা গিট দিয়ে পুশ করুন: `git push -u origin main`)
-4. এর পর থেকে প্রতিবার `main` ব্রাঞ্চে কোনো পরিবর্তন পুশ করলেই `.github/workflows/deploy.yml` ওয়ার্কফ্লো স্বয়ংক্রিয়ভাবে সাইটটি লাইভ আপডেট করে দেবে!
-
-আপনার সাইটের লাইভ ইউআরএল হবে:
-`https://<your-username>.github.io/bd-food-passport/`
-
----
-
-## 🌐 Vercel-এ ডিপ্লয়মেন্ট গাইড (Deploying to Vercel for Free)
-
-এই অ্যাপটি ১০০% ক্লায়েন্ট-সাইড স্ট্যাটিক। এটি Vercel-এ কোনো খরচ ছাড়া আজীবন চালানো যাবে।
-
-### পদ্ধতি ১: GitHub ও Vercel ড্যাশবোর্ড (সবচেয়ে সহজ)
-1. কোডটি আপনার GitHub রিপোজিটরিতে পুশ করুন:
-   ```bash
-   git init
-   git add .
-   git commit -m "feat: Bangladesh Food Passport initial release"
-   git branch -M main
-   git remote add origin https://github.com/<your-username>/bd-food-passport.git
-   git push -u origin main
-   ```
-2. [vercel.com](https://vercel.com)-এ লগইন করুন।
-3. **"Add New Project"** > **"Import Git Repository"** নির্বাচন করে রিপোজিটরিটি বেছে নিন।
-4. Vercel অটোমেটিকভাবে `Vite` ফ্রেমওয়ার্ক শনাক্ত করবে:
-   - **Build Command:** `npm run build`
-   - **Output Directory:** `dist`
-5. **"Deploy"** বাটনে ক্লিক করুন। কয়েক সেকেন্ডের মধ্যে আপনার লাইভ সাইট তৈরি হয়ে যাবে!
-
-### পদ্ধতি ২: Vercel CLI দিয়ে সরাসরি ডিপ্লয়
-```bash
-# Vercel CLI ইনস্টল ও ডিপ্লয়
-npx vercel
-```
-প্রম্পট আসলে ডিফল্ট অপশনগুলো সিলেক্ট করুন (`dist` আউটপুট ডিরেক্টরি)।
-
-প্রোডাকশনে পাঠাতে:
+Deploy with Vercel CLI:
 ```bash
 npx vercel --prod
 ```
 
----
+Or connect the GitHub repository directly to [Vercel](https://vercel.com) using the `Vite` project preset.
 
-## 📂 ডেটা ফাইল স্ট্রাকচার (`/data/foods.js`)
-
-সব ৬৪ জেলার ঐতিহ্যবাহী খাবার তালিকাভুক্ত আছে `/src/data/foods.js` এবং `/data/foods.js` ফাইলে:
-- `id`: জেলার স্বতন্ত্র আইডি (যা SVG পাথের সাথে সরাসরি যুক্ত)
-- `nameBn`: বাংলা নাম (যেমন: `বগুড়া`)
-- `nameEn`: ইংরেজি নাম (যেমন: `Bogura`)
-- `divisionBn`: বিভাগ (যেমন: `রাজশাহী`)
-- `foodBn`: বিখ্যাত খাবার (যেমন: `স্পেশাল দই ও ক্ষীরসা`)
-- `foodEn`: ইংরেজি খাবারের নাম
-- `emoji`: রিপ্রেজেন্টেটিভ ইমোজি (যেমন: `🥣`)
-- `descriptionBn`: ঐতিহ্য ও স্বাদের ১-লাইন বিবরণ
-- যেসকল জেলায় একাধিক জনপ্রিয় বিকল্প বিদ্যমান সেগুলোতে পর্যালোচনা করার সুবিধার্থে `// TODO:` কমেন্ট রাখা হয়েছে।
+### GitHub Pages Deployment
+A GitHub Actions workflow is provided in `.github/workflows/deploy.yml` for continuous deployment to GitHub Pages upon pushing changes to the `main` branch.
 
 ---
 
-## 📱 মোবাইল ভিউপোর্ট টেস্ট (390px Viewport)
+## Data Architecture
 
-অ্যাপটি বিশেষভাবে আধুনিক স্মার্টফোনের স্ট্যান্ডার্ড ৩৯০ পিক্সেল (iPhone 12/13/14/15/16 প্রস্থ) স্ক্রিনের জন্য তৈরি করা হয়েছে।
-- বটম ড্রয়ার স্বয়ংক্রিয়ভাবে আঙুলের স্পর্শে ওঠানামা করে।
-- মানচিত্রে এক আঙুলে প্যান ও দুই আঙুলে পিঞ্চ-জুম কাজ করে।
-- কার্ড জেনারেটর প্রিভিউ ৩৯০ পিক্সেল স্ক্রিনের সীমার ভেতরে থাকে এবং এক্সপোর্ট করার সময় স্বয়ংক্রিয়ভাবে হাই-রেজোলিউশন ১০৮০x১৩৫০ পিক্সেল ইমেজ প্রস্তুত করে।
+District culinary datasets are maintained under `/src/data/foods.js`:
+- `id`: Unique district identifier matched to the SVG vector path
+- `nameBn`: District name in Bengali
+- `nameEn`: District name in English
+- `divisionBn`: Administrative division
+- `foodBn`: Famous traditional culinary item
+- `foodEn`: English item description
+- `descriptionBn`: Historical context and culinary significance
 
 ---
 
-নির্মিত: **বাংলাদেশ ফুড পাসপোর্ট টিম**
-লাইসেন্স: MIT
+## Author and Attribution
+
+**Developed by S. M. Mahmud Iqbal**  
+- GitHub: [@SMMahmudIqbal](https://github.com/SMMahmudIqbal)
+
+---
+
+## License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
