@@ -1,5 +1,4 @@
-// Bangladesh Food Passport - 64 Districts Food Database
-// Includes authentic signature foods, famous shops/spots, emojis, and cultural notes.
+// Bangladesh Food Passport - 64 Districts Food Database • Includes authentic signature foods, famous shops/spots, emojis, and cultural notes.
 
 export const DISTRICTS_FOOD = [
   // --- DHAKA DIVISION ---

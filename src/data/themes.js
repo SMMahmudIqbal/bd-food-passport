@@ -1,5 +1,4 @@
-// Bangladesh Food Passport - Selectable Visual Themes
-// Supports 5 distinct liquid glass palettes for the app & passport card
+// Bangladesh Food Passport - Selectable Visual Themes • Supports 5 distinct liquid glass palettes for the app & passport card
 
 export const THEMES = [
   {

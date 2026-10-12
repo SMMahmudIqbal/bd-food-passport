@@ -1,5 +1,4 @@
-// Bangladesh Food Passport - Culinary Badges & Achievements System
-// Gamification criteria for unlocking special culinary titles
+// Bangladesh Food Passport - Culinary Badges & Achievements System • Gamification criteria for unlocking special culinary titles
 
 import { DISTRICTS_FOOD } from './foods';
 

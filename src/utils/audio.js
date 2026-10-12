@@ -1,5 +1,4 @@
-// Web Audio API Synthesizer for Tactile Haptic Audio Feedback
-// Zero external audio files required, instant latency-free playback, 100% offline!
+// Web Audio API Synthesizer for Tactile Haptic Audio Feedback • Zero external audio files required, instant latency-free playback, 100% offline!
 
 let audioCtx = null;
 let soundEnabled = true;
