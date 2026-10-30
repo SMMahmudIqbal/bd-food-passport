@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import Header from './components/Header';
 import MapView from './components/MapView';
 import FoodSheet from './components/FoodSheet';
@@ -392,6 +393,7 @@ export default function App() {
           মিনিমালিস্টিক লিকুইড গ্লাস থিম • ৫টি বাছাইযোগ্য কালার প্যালেট • বাকেট লিস্ট ও ব্যাজ • PWA অফলাইন সাপোর্ট
         </p>
       </footer>
+      <Analytics />
     </div>
   );
 }
